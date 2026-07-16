@@ -1,12 +1,72 @@
 ---
-import { serviceOptions } from '../config/site';
+import { contact, serviceOptions } from '../config/site';
+
+/**
+ * The Cloudflare function redirects back here with ?submitted=ok|error so the
+ * result survives without JavaScript. Prerendered pages can't read that at
+ * build time, so the banner is revealed client-side from the query string.
+ */
+const errorReasons: Record<string, string> = {
+  missing: 'Please fill in every required field.',
+  email: 'That email address doesn’t look right — please check it.',
+  verification: 'We couldn’t verify that you’re human. Please try again.',
+  send: 'Something went wrong on our end and the message wasn’t sent.',
+  malformed: 'Something went wrong with that submission. Please try again.',
+};
 ---
+
+<div class="status" data-status hidden>
+  <p class="status__ok" data-status-ok hidden>
+    Thank you &mdash; your message has been sent. I&rsquo;ll be in touch.
+  </p>
+  <p class="status__error" data-status-error hidden>
+    <span data-status-message></span>{' '}
+    You can also email <a href={`mailto:${contact.email}`}>{contact.email}</a> directly.
+  </p>
+</div>
+
+{/* Deferred until the document is parsed: this script sits above the <form> in
+    the DOM, so running it inline would query for an element that doesn't exist
+    yet and silently leave the form on screen after a successful send. */}
+<script is:inline define:vars={{ errorReasons }}>
+  (() => {
+    const apply = () => {
+      const params = new URLSearchParams(window.location.search);
+      const submitted = params.get('submitted');
+      if (!submitted) return;
+
+      const box = document.querySelector('[data-status]');
+      const ok = document.querySelector('[data-status-ok]');
+      const err = document.querySelector('[data-status-error]');
+      const msg = document.querySelector('[data-status-message]');
+      const form = document.querySelector('.form');
+      if (!box) return;
+
+      box.hidden = false;
+      if (submitted === 'ok') {
+        if (ok) ok.hidden = false;
+        if (form) form.hidden = true;
+      } else {
+        if (err) err.hidden = false;
+        if (msg) msg.textContent = errorReasons[params.get('reason')] || 'Something went wrong.';
+      }
+      box.setAttribute('tabindex', '-1');
+      box.focus();
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', apply);
+    } else {
+      apply();
+    }
+  })();
+</script>
 
 <form class="form" method="POST" action="/api/contact" novalidate>
   <p class="form__notice">
     Please don&rsquo;t include sensitive health details in this message &mdash; just enough
     to get in touch. This form is not a secure or confidential channel, and it isn&rsquo;t
-    for emergencies. If you are in crisis, call or text <a href="tel:988">988</a>, or call
+    for emergencies. If you are in crisis, call or text <a href="tel:988">988</a>, or call{' '}
     <a href="tel:911">911</a>.
   </p>
 
@@ -58,6 +118,27 @@ import { serviceOptions } from '../config/site';
 </form>
 
 <style>
+  .status {
+    max-width: 38rem;
+    margin-bottom: var(--space-md);
+  }
+
+  .status p {
+    margin: 0;
+    padding: var(--space-sm) var(--space-md);
+    font-size: 1.05rem;
+  }
+
+  .status__ok {
+    border-left: 3px solid var(--slate);
+    background: var(--sand);
+  }
+
+  .status__error {
+    border-left: 3px solid #b3261e;
+    background: #fdeceb;
+  }
+
   .form {
     max-width: 38rem;
   }

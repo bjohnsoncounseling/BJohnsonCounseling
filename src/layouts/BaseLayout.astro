@@ -76,7 +76,9 @@ const jsonLd = {
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* Brandon's own icon, pulled from the Squarespace site. Squarespace served
+        it as JPEG despite the .ico name, hence the extension and type here. */}
+    <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta property="og:site_name" content={site.name} />

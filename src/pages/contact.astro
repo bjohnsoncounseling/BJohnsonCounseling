@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { acceptingNewClients, address, contact, practitioner, unavailableNotice } from '../config/site';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Contact Brandon Johnson Counseling — SE Portland, and remote appointments across Oregon and Washington."
+>
+  <section class="section">
+    <div class="container">
+      <h1>Contact me.</h1>
+
+      {
+        !acceptingNewClients && (
+          <p class="notice" role="status">
+            {unavailableNotice}
+          </p>
+        )
+      }
+
+      <div class="contact">
+        <div class="contact__details">
+          <p class="contact__who">
+            <strong>{practitioner.name}, {practitioner.degree}</strong><br />
+            {practitioner.pronouns}<br />
+            {
+              practitioner.licenses.map((l) => (
+                <>{l.state} {l.title} ({l.title.includes('Marriage') ? 'LMFT' : 'LMHC'})<br /></>
+              ))
+            }
+          </p>
+
+          <p>
+            <a href={`mailto:${contact.email}`}>{contact.email}</a><br />
+            phone: <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a><br />
+            fax: {contact.fax}
+          </p>
+
+          <address>
+            {address.street}<br />
+            {address.city}, {address.state} {address.zip}
+          </address>
+        </div>
+
+        <div class="contact__form">
+          <ContactForm />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notice {
+    max-width: var(--measure);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
+    border-left: 3px solid var(--accent);
+    background: var(--sand);
+    font-size: 1.05rem;
+  }
+
+  .contact {
+    display: grid;
+    gap: var(--space-lg);
+    align-items: start;
+  }
+
+  .contact__details {
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+
+  .contact__who {
+    font-size: 1.05rem;
+  }
+
+  .contact__details address {
+    font-style: normal;
+  }
+
+  .contact__details a {
+    color: var(--accent-text);
+  }
+
+  @media (min-width: 52rem) {
+    .contact {
+      grid-template-columns: 20rem 1fr;
+      gap: var(--space-xl);
+    }
+  }
+</style>

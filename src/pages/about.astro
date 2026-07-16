@@ -1,0 +1,193 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import CTASection from '../components/CTASection.astro';
+import Button from '../components/Button.astro';
+import { insurers, rates } from '../config/site';
+
+import heroTree from '../assets/images/hero-tree.jpg';
+import officeSpace from '../assets/images/office-counseling-space.jpg';
+import officeWaiting from '../assets/images/office-waiting-room.jpg';
+import officeEntrance from '../assets/images/office-entrance.jpg';
+import officeBuilding from '../assets/images/office-building.jpg';
+
+/**
+ * Brandon's own photos of the office. Alt text for the counseling room is
+ * written from the photo; the other three keep the labels Brandon wrote on the
+ * Squarespace site, which are accurate but terse — worth enriching once someone
+ * who knows the space can describe them.
+ */
+const office = [
+  {
+    image: officeSpace,
+    alt: 'Brandon’s counseling room: two olive tufted armchairs and a soft grey chair arranged around a patterned rug, with a bookshelf, a fiddle-leaf fig, and a warm salt lamp.',
+    caption: 'Brandon’s Counseling Space',
+  },
+  { image: officeWaiting, alt: 'The waiting room at Brandon’s office.', caption: 'Waiting Room' },
+  { image: officeEntrance, alt: 'The entrance to Brandon’s counseling office.', caption: 'Counseling Entrance' },
+  { image: officeBuilding, alt: 'The exterior of Brandon’s office building.', caption: 'Office Building' },
+];
+---
+
+<BaseLayout
+  title="About"
+  description="Rates, insurance, and approach — Brandon Johnson Counseling, SE Portland. In-network with OHP, Aetna, Providence, Regence, and more."
+>
+  <PageHero
+    title="I want to help you find what you’re looking for"
+    image={heroTree}
+    alt="A broad tree in full leaf on a sunlit lawn, backlit by morning light."
+  />
+
+  <section class="section">
+    <div class="container measure prose">
+      <h2>Growing in relationship</h2>
+      <p>
+        I believe we are all figuring out how to be in relationship with ourselves and each
+        other, and inviting another person in who is dedicated to helping you understand your
+        patterns and shaping new ones can make all the difference.
+      </p>
+
+      <h2>My approach</h2>
+      <p>
+        I specialize in relationships, anxiety, depression, and trauma. I believe that joining
+        together to build trust is the basis for our work together. The approach I use for
+        working with relationships is Emotionally Focused Therapy (EFT), building on the idea
+        of security and trust in relationships as the foundation for connection,
+        communication, and collaboration. For individuals, I lean on much of the same basic
+        concepts, and I also draw on Acceptance and Commitment Therapy (ACT), which builds on
+        acceptance, present-moment awareness, a solid sense of self, flexibility, values, and
+        intentional action. For working with trauma, I use Eye-Movement Desensitization &amp;
+        Reprocessing Therapy (EMDR) and Emotion-Focused Trauma Therapy (EFTT).
+      </p>
+      <p><Button href="/my-approach">Learn More</Button></p>
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="container">
+      <h2>Rates</h2>
+      <div class="rates">
+        {
+          rates.map((rate) => (
+            <article class="rate">
+              <h3>{rate.title}</h3>
+              <p>{rate.body}</p>
+              <p class="rate__line">
+                <span>{rate.duration}</span>
+                <span aria-hidden="true">|</span>
+                <strong>{rate.price}</strong>
+                <span aria-hidden="true">|</span>
+                <a href="/contact">Get started</a>
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container measure">
+      <h2>Insurance</h2>
+      <p>I’m In-Network with the following insurance companies:</p>
+      <ul class="insurers">
+        {insurers.map((name) => <li>{name}</li>)}
+      </ul>
+      <p class="prose">
+        Some insurance companies may reimburse you after paying out of pocket for
+        Out-of-Network benefits. Feel free to <a href="/contact">ask for more details</a>
+        regarding insurance payments.
+      </p>
+
+      <h2>Sliding Scale and Referrals</h2>
+      <p class="prose">
+        If the fee is what keeps you from seeking help, feel free to
+        <a href="/contact">contact me</a> to see if we can find a solution that can work,
+        possibly including a lower rate or referrals to other counselors.
+      </p>
+      <p><Button href="/contact">Get started</Button></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="center">The space</h2>
+      <ul class="office">
+        {
+          office.map((photo) => (
+            <li>
+              <figure class="office__figure">
+                <Image src={photo.image} alt={photo.alt} widths={[520, 1040]} sizes="(max-width: 52rem) 90vw, 32rem" />
+                <figcaption>{photo.caption}</figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <CTASection heading="Have more questions?" />
+</BaseLayout>
+
+<style>
+  .rates {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    margin-top: var(--space-md);
+  }
+
+  .rate h3 {
+    margin-bottom: var(--space-2xs);
+  }
+
+  .rate__line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-xs);
+    align-items: baseline;
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  .rate__line a {
+    color: var(--accent-text);
+  }
+
+  .insurers {
+    display: grid;
+    gap: var(--space-2xs) var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    margin-bottom: var(--space-md);
+    padding: 0;
+    list-style: none;
+  }
+
+  .insurers li {
+    padding-block: var(--space-2xs);
+    border-bottom: 1px solid var(--rule);
+    font-size: 1rem;
+  }
+
+  .office {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    margin: var(--space-lg) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .office__figure {
+    margin: 0;
+  }
+
+  .office__figure figcaption {
+    margin-top: var(--space-2xs);
+    font-size: var(--size-small);
+    opacity: 0.75;
+  }
+</style>

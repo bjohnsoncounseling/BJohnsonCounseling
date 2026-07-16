@@ -1,0 +1,94 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import CTASection from '../components/CTASection.astro';
+
+import heroTree from '../assets/images/hero-tree.jpg';
+import serviceIndividual from '../assets/images/service-individual.jpeg';
+import serviceTrauma from '../assets/images/service-trauma.jpeg';
+import serviceCouples from '../assets/images/service-couples.jpg';
+
+const services = [
+  {
+    title: 'Individual Counseling',
+    image: serviceIndividual,
+    alt: 'Two people sitting across a small table, each holding a mug, in conversation.',
+    body: 'Sometimes individuals reach out wanting to feel better, other times it’s about resolving an issue like challenges in a relationship, and sometimes it’s about seeking to understand yourself and learn how to have a stronger relationship with yourself and your own life. Whether it’s finding purpose and joy in depression, peace in anxiety, resilience from trauma, or pursuing goals or clarity in life, we can do it together.',
+  },
+  {
+    title: 'Couples Counseling',
+    image: serviceCouples,
+    alt: 'Two people resting side by side on a blanket in a pine forest.',
+    body: 'Couples sometimes get caught in patterns that push them apart from each other when they wish they were closer. Working through it can be painful or scary, and having someone to guide the process of renewing that closeness and trust can make all the difference. We’ll partner to find freedom from cycles of disconnection, connecting and understanding yourselves and each other, and building a new patterns together.',
+  },
+  {
+    title: 'Trauma Therapy',
+    image: serviceTrauma,
+    alt: 'A person looking out toward a snow-capped mountain framed by evergreens.',
+    body: "Trauma can leave deep imprints on our lives, often manifesting in ways that disrupt our sense of safety, connection, and self-worth. It can feel overwhelming, but healing is possible. In our work together, we'll create a safe space to explore and understand these experiences, allowing you to reclaim your sense of self and rewrite the narrative of your life. Whether it’s through processing difficult memories, restoring a sense of calm, or finding new pathways to resilience, we'll work together to heal and build a future grounded in strength and hope.",
+  },
+];
+---
+
+<BaseLayout
+  title="Services"
+  description="Individual counseling, couples counseling, and trauma therapy with Brandon Johnson, LMFT/LMHC, in SE Portland and remotely across Oregon and Washington."
+>
+  <PageHero
+    title="There’s a way forward, and finding it can be difficult. I’m here so we can do it together."
+    image={heroTree}
+    alt="A broad tree in full leaf on a sunlit lawn, backlit by morning light."
+  />
+
+  <section class="section">
+    <div class="container">
+      <h2 class="center">My services</h2>
+      <div class="services">
+        {
+          services.map((service) => (
+            <article class="service">
+              <Image src={service.image} alt={service.alt} widths={[420, 840]} sizes="(max-width: 48rem) 90vw, 26rem" />
+              <div class="service__text prose">
+                <h3>{service.title}</h3>
+                <p>{service.body}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CTASection heading="Questions before getting started? Get in touch." />
+</BaseLayout>
+
+<style>
+  .services {
+    display: grid;
+    gap: var(--space-xl);
+    margin-top: var(--space-lg);
+  }
+
+  .service {
+    display: grid;
+    gap: var(--space-md);
+    align-items: center;
+  }
+
+  .service h3 {
+    margin-top: 0;
+  }
+
+  @media (min-width: 52rem) {
+    .service {
+      grid-template-columns: 24rem 1fr;
+      gap: var(--space-lg);
+    }
+
+    /* Alternate the image side so the column doesn't read as a list of rows. */
+    .service:nth-child(even) > :global(img) {
+      order: 2;
+    }
+  }
+</style>

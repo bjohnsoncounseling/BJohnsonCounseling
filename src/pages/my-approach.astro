@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import CTASection from '../components/CTASection.astro';
+
+import mtHood from '../assets/images/mt-hood.jpg';
+
+const issues = [
+  'Abuse',
+  'Anxiety',
+  'Compassion Fatigue',
+  'Complex Trauma',
+  'Depression',
+  'Dissociative Disorders (DID)',
+  'Faith Deconstruction/Reconstruction',
+  'Panic',
+  'Personal Growth',
+  'PTSD',
+  'Relationship / Marriage Issues',
+  'Religious/Spiritual Trauma',
+  'Self-Esteem',
+  'Sexual Abuse',
+  'Social Phobia',
+  'Spirituality',
+];
+
+const techniques = [
+  'Acceptance and Commitment Therapy (ACT)',
+  'Attachment Theory',
+  'Couples Counseling',
+  'EMDR (Eye-Movement Desensitization & Reprocessing Therapy)',
+  'Emotionally Focused/Emotion-Focused Therapy',
+  'Existential Psychotherapy',
+  'Feminist Therapy',
+  'Holistic Therapy',
+  'Humanistic Therapy',
+  'Individual Therapy',
+  'Interpersonal Neurobiology',
+  'Mindfulness-Based Therapy',
+  'Nonviolent Communication',
+  'Person-Centered Therapy',
+  'Systems Theory',
+];
+---
+
+<BaseLayout
+  title="My Approach"
+  description="An approach rooted in relationships, EFT, ACT, and EMDR — respecting each person’s story and building toward their goals from there."
+>
+  <PageHero
+    title="Find Someone to Walk Beside You"
+    image={mtHood}
+    alt="Mount Hood under clear skies, seen across a forested ridge."
+  />
+
+  <section class="section">
+    <div class="container measure prose">
+      <h2>My Approach</h2>
+      <p>
+        My approach starts with respecting each person’s story and perspective and builds
+        toward goals from there. Whether in relationship with yourself, your partner, or
+        others in your life, sometimes you get stuck in loops and can&apos;t seem to break free.
+        I’m here to explore with you in understanding where these cycles have come from,
+        making sense of yourself and the world around you, and learning where to go from
+        there. Freedom from those cycles can be hard to find on your own, and together we can
+        untangle and make sense of where you are and explore the path to where you’d rather be.
+      </p>
+      <p>
+        I use a variety of methods for helping people reach for meaning, connection, and the
+        life they’re hoping for. My approach is based in relationships, learning to recognize
+        patterns and build new strategies for meeting needs, developing a story that can help
+        map out a new direction, facing and accepting the difficult aspects of life,
+        clarifying values, and understanding how bodies and brains impact how people function.
+        I partner with people to incorporate their values, beliefs, backgrounds, needs, and
+        expertise in their own lives into the process of growth, change, and connection that
+        promote resilience, interdependence, and freedom in life and relationships.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="container">
+      <h2>Issues I Treat</h2>
+      <ul class="tags">
+        {issues.map((i) => <li>{i}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Techniques I Use</h2>
+      <ul class="tags">
+        {techniques.map((t) => <li>{t}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <CTASection heading="Learn how we can find the way forward together." tone="sand" />
+</BaseLayout>
+
+<style>
+  .tags {
+    display: grid;
+    gap: var(--space-2xs) var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    margin: var(--space-md) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tags li {
+    padding-block: var(--space-2xs);
+    border-bottom: 1px solid var(--rule);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+</style>

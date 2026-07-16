@@ -1,0 +1,165 @@
+---
+import { serviceOptions } from '../config/site';
+---
+
+<form class="form" method="POST" action="/api/contact" novalidate>
+  <p class="form__notice">
+    Please don&rsquo;t include sensitive health details in this message &mdash; just enough
+    to get in touch. This form is not a secure or confidential channel, and it isn&rsquo;t
+    for emergencies. If you are in crisis, call or text <a href="tel:988">988</a>, or call
+    <a href="tel:911">911</a>.
+  </p>
+
+  <fieldset class="form__group">
+    <legend>Name <span class="req">(required)</span></legend>
+    <div class="form__row">
+      <p class="field">
+        <label for="firstName">First Name</label>
+        <input id="firstName" name="firstName" type="text" autocomplete="given-name" required />
+      </p>
+      <p class="field">
+        <label for="lastName">Last Name</label>
+        <input id="lastName" name="lastName" type="text" autocomplete="family-name" required />
+      </p>
+    </div>
+  </fieldset>
+
+  <p class="field">
+    <label for="phone">Phone</label>
+    <input id="phone" name="phone" type="tel" autocomplete="tel" />
+  </p>
+
+  <p class="field">
+    <label for="email">Email <span class="req">(required)</span></label>
+    <input id="email" name="email" type="email" autocomplete="email" required />
+  </p>
+
+  <p class="field">
+    <label for="service">Service Requested <span class="req">(required)</span></label>
+    <select id="service" name="service" required>
+      <option value="">Select an option</option>
+      {serviceOptions.map((o) => <option value={o}>{o}</option>)}
+    </select>
+  </p>
+
+  <p class="field">
+    <label for="message">Message <span class="req">(required)</span></label>
+    <textarea id="message" name="message" rows="6" required></textarea>
+  </p>
+
+  {/* Honeypot: a real person never fills this; bots usually do. Hidden from
+      assistive tech too, so screen-reader users don't trip it. */}
+  <p class="hp" aria-hidden="true">
+    <label for="company">Company</label>
+    <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+  </p>
+
+  <button type="submit" class="form__submit">Send</button>
+</form>
+
+<style>
+  .form {
+    max-width: 38rem;
+  }
+
+  .form__notice {
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm);
+    border: 1px solid var(--rule);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .form__notice a {
+    color: var(--accent-text);
+  }
+
+  .form__group {
+    margin: 0 0 var(--space-sm);
+    padding: 0;
+    border: 0;
+  }
+
+  .form__group legend {
+    padding: 0;
+    font-size: 1rem;
+  }
+
+  .form__row {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0 0 var(--space-sm);
+  }
+
+  .field label {
+    font-size: 1rem;
+  }
+
+  .req {
+    opacity: 0.65;
+    font-size: 0.9rem;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  /* Marks the field, not just the summary, when validation fails. */
+  input:user-invalid,
+  select:user-invalid,
+  textarea:user-invalid {
+    border-color: #b3261e;
+    outline-color: #b3261e;
+  }
+
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form__submit {
+    padding: var(--btn-padding);
+    border: 0;
+    border-radius: 0;
+    background: var(--accent);
+    color: var(--on-dark);
+    font-family: var(--font-body);
+    font-size: var(--btn-size);
+    letter-spacing: var(--btn-tracking);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+
+  .form__submit:hover {
+    background: var(--accent-hover);
+  }
+
+  @media (min-width: 32rem) {
+    .form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

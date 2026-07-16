@@ -1,0 +1,94 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CTASection from '../components/CTASection.astro';
+import { practitioner } from '../config/site';
+
+import headshot from '../assets/images/headshot-brandon.jpeg';
+
+/**
+ * The live site marked "Brandon Johnson", "MA", and each licence line up as
+ * separate headings. They are credentials, not sections — plain text here.
+ */
+const beliefs = [
+  'I believe my role is to be with you, meeting you wherever you are. While I can use how I understand my own story to help me understand your story, your story is your own, and I’m not the one who defines what that means for you. I’m here to guide the process and the space for you to show up.',
+  'I believe humans are wired for connection and that building connections between all the different parts of ourselves and between us and the others in our lives is how to build wholeness, resilience, and meaning.',
+  'I believe each person has a unique set of circumstances that shapes who they are and what life is like for them. I believe naming both what is shared as part of being human and what is distinct between us and our experiences is essential to help fit the pieces together and be able to connect as one person to another.',
+  'I believe naming differences like race, culture, gender, religion, sexuality, age, ability, education, or any other parts of who we are and what shapes our experiences is an important part of being able to connect with honesty and compassion. I also believe living with compassion means more than simply speaking kind words and includes actively opposing forces like racism, hatred, and injustice in the world around me and in my own habitual ways of thinking and responding.',
+  'I believe being whole requires knowing my values and committing to act in line with those values. One of my values is respecting differences in perspective and seeking to approach new and different ideas with curiosity and other people with hospitality, respect, and honor.',
+];
+---
+
+<BaseLayout
+  title="Who I Am"
+  description="Brandon Johnson, MA — Licensed Marriage & Family Therapist (Oregon) and Licensed Mental Health Counselor (Washington), practicing in SE Portland."
+>
+  <section class="section">
+    <div class="container">
+      <h1 class="center intro-title">Let me introduce myself.</h1>
+
+      <div class="bio">
+        <Image
+          src={headshot}
+          alt={`${practitioner.name}, standing outdoors in front of a flowering tree.`}
+          class="bio__photo"
+          widths={[440, 880]}
+          sizes="(max-width: 52rem) 80vw, 26rem"
+          loading="eager"
+        />
+
+        <div class="bio__text prose">
+          <h2>Who I Am</h2>
+          <p class="credentials">
+            <strong>{practitioner.name}, {practitioner.degree}</strong><br />
+            {practitioner.pronouns}<br />
+            {
+              practitioner.licenses.map((l) => (
+                <>
+                  {l.title}<br />
+                  {l.state} #{l.number}<br />
+                </>
+              ))
+            }
+          </p>
+          {beliefs.map((p) => <p>{p}</p>)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTASection heading="Have more questions?" />
+</BaseLayout>
+
+<style>
+  .intro-title {
+    margin-bottom: var(--space-lg);
+  }
+
+  .bio {
+    display: grid;
+    gap: var(--space-lg);
+    align-items: start;
+  }
+
+  .bio__text h2 {
+    margin-top: 0;
+  }
+
+  .credentials {
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  @media (min-width: 52rem) {
+    .bio {
+      grid-template-columns: 24rem 1fr;
+      gap: var(--space-xl);
+    }
+
+    .bio__photo {
+      position: sticky;
+      top: var(--space-md);
+    }
+  }
+</style>

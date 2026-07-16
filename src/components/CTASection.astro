@@ -1,0 +1,19 @@
+---
+import Button from './Button.astro';
+
+interface Props {
+  heading: string;
+  href?: string;
+  label?: string;
+  tone?: 'sand' | 'plain';
+}
+
+const { heading, href = '/contact', label = 'Book a Consultation', tone = 'sand' } = Astro.props;
+---
+
+<section class:list={['section', 'center', tone === 'sand' && 'section--sand']}>
+  <div class="container">
+    <h2>{heading}</h2>
+    <Button href={href}>{label}</Button>
+  </div>
+</section>

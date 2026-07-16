@@ -1,0 +1,211 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/images/logo.png';
+import { nav, site } from '../config/site';
+import Button from './Button.astro';
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path === `${href}/`;
+---
+
+<header class="header">
+  <div class="header__inner container">
+    <a href="/" class="header__logo" aria-label={`${site.name} — home`}>
+      <Image src={logo} alt={site.name} widths={[520, 1040]} sizes="(max-width: 40rem) 68vw, 32.5rem" loading="eager" />
+    </a>
+
+    <button
+      type="button"
+      class="header__toggle"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      aria-label="Open menu"
+    >
+      <span class="header__bars" aria-hidden="true"></span>
+    </button>
+
+    <nav id="site-nav" class="nav" aria-label="Main">
+      <ul class="nav__list">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <Button href="/contact" class="nav__cta">Get Started</Button>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    background: var(--sand);
+    color: var(--ink);
+  }
+
+  .header__inner {
+    display: flex;
+    flex-wrap: wrap; /* lets the open mobile nav drop to its own row */
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm) var(--space-md);
+    padding-block: var(--space-sm);
+  }
+
+  .header__logo {
+    flex: 0 1 32.5rem;
+    min-width: 0;
+  }
+
+  .header__logo img {
+    width: 100%;
+    height: auto;
+  }
+
+  .header__toggle {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* Three bars drawn from one element: the middle is the box, the outer two are
+     pseudo-elements that rotate into an X when open. */
+  .header__bars,
+  .header__bars::before,
+  .header__bars::after {
+    display: block;
+    width: 1.75rem;
+    height: 1px;
+    background: currentColor;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+
+  .header__bars::before,
+  .header__bars::after {
+    content: '';
+    position: relative;
+  }
+
+  .header__bars::before {
+    top: -0.5rem;
+  }
+  .header__bars::after {
+    top: calc(0.5rem - 1px);
+  }
+
+  .header__toggle[aria-expanded='true'] .header__bars {
+    background: transparent;
+  }
+
+  .header__toggle[aria-expanded='true'] .header__bars::before {
+    transform: translateY(0.5rem) rotate(45deg);
+  }
+
+  .header__toggle[aria-expanded='true'] .header__bars::after {
+    transform: translateY(calc(-0.5rem + 1px)) rotate(-45deg);
+  }
+
+  .nav__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav__list a {
+    font-size: 1rem;
+    text-decoration: none;
+  }
+
+  .nav__list a:hover,
+  .nav__list a[aria-current='page'] {
+    text-decoration: underline;
+  }
+
+  /* Collapsed: nav is hidden behind the toggle and stacks vertically. */
+  @media (max-width: 59.999rem) {
+    .header__logo {
+      flex: 1 1 auto;
+      max-width: 20rem;
+    }
+
+    .nav {
+      display: none;
+      flex-basis: 100%;
+      order: 3;
+      padding-block: var(--space-sm) var(--space-md);
+      border-top: 1px solid var(--rule);
+    }
+
+    .nav[data-open='true'] {
+      display: block;
+    }
+
+    .nav__list {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .nav__list a {
+      font-size: 1.15rem;
+    }
+
+    :global(.nav__cta) {
+      margin-top: var(--space-md);
+    }
+  }
+
+  /* Expanded: full horizontal nav plus the CTA, matching the live desktop header. */
+  @media (min-width: 60rem) {
+    .header__toggle {
+      display: none;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .nav__list {
+      justify-content: flex-end;
+      max-width: 26rem;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.header__toggle');
+  const menu = document.querySelector<HTMLElement>('#site-nav');
+
+  if (toggle && menu) {
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      toggle.setAttribute('aria-label', open ? 'Open menu' : 'Close menu');
+      menu.dataset.open = String(!open);
+    });
+
+    // Escape closes the menu and returns focus to the control that opened it.
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (toggle.getAttribute('aria-expanded') !== 'true') return;
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open menu');
+      menu.dataset.open = 'false';
+      toggle.focus();
+    });
+  }
+</script>

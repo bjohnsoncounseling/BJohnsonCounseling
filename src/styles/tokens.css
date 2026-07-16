@@ -1,0 +1,57 @@
+/**
+ * Design tokens read from the live Squarespace site's computed styles.
+ * These are measured values, not approximations.
+ */
+
+:root {
+  /* Palette */
+  --ink: #3f4a49; /* body text — dark slate-green */
+  --sand: #dcd9d0; /* header background — warm neutral */
+  --accent: #d4967d; /* buttons — terracotta */
+  --slate: #495a58; /* dark section backgrounds (e.g. "My services") */
+  --bg: #ffffff;
+  --on-dark: #ffffff;
+
+  /* Derived. Terracotta on white is ~2.3:1 — fine for a button face, far too
+     low for text. --accent-text is darkened to clear 4.5:1 for links on white. */
+  --accent-hover: #c07f63;
+  --accent-text: #a35c3e;
+  --rule: rgba(63, 74, 73, 0.18);
+
+  /* Type. Heading face is set in one place so Phase 2's comparison resolves to
+     a single edit here. */
+  --font-heading: 'EB Garamond Variable', Georgia, serif;
+  --font-body: 'Pontano Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --text-base: 1.25rem; /* 20px, matching the live site's body copy */
+  --leading-body: 1.8;
+  --leading-heading: 1.24;
+
+  /* Fluid heading sizes. Live site renders h2 at ~42px on desktop. */
+  --size-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
+  --size-h2: clamp(1.9rem, 1.45rem + 1.9vw, 2.65rem);
+  --size-h3: clamp(1.35rem, 1.2rem + 0.7vw, 1.65rem);
+  --size-small: 0.95rem;
+
+  /* Spacing */
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 3.5rem;
+  --space-xl: 5.5rem;
+  --section-y: clamp(3.5rem, 8vw, 6.5rem);
+
+  /* Layout */
+  --measure: 46rem; /* readable line length for prose */
+  --container: 71.9375rem; /* 1151px — the live site's content width */
+  --gutter: clamp(1.25rem, 5vw, 2.5rem);
+
+  /* Buttons — square corners, uppercase, wide tracking, per the live site */
+  --btn-padding: 1.35rem 2.25rem;
+  --btn-tracking: 0.1em;
+  --btn-size: 0.96rem;
+
+  /* Nav collapses to a hamburger here, matching current behavior */
+  --bp-nav: 60rem;
+}

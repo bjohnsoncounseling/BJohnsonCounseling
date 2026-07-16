@@ -1,0 +1,89 @@
+---
+import { addressOneLine, contact, nav, practitioner, site } from '../config/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__col">
+      <h2 class="footer__heading">Stay in touch.</h2>
+      <p class="footer__contact">
+        <a href={`mailto:${contact.email}`}>{contact.email}</a><br />
+        <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a>
+      </p>
+      <address class="footer__address">
+        {addressOneLine}
+      </address>
+    </div>
+
+    <div class="footer__col">
+      <h2 class="footer__heading">Questions?</h2>
+      <p><a href="/contact">Contact me</a></p>
+    </div>
+
+    <nav class="footer__col" aria-label="Footer">
+      <h2 class="footer__heading">Explore</h2>
+      <ul class="footer__list">
+        {nav.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="container footer__legal">
+    <p>
+      &copy; {year} {site.name}. {practitioner.name}, {practitioner.degree} &mdash;
+      {practitioner.licenses.map((l, i) => (
+        <>{i > 0 ? ' · ' : ''}{l.title} ({l.state} #{l.number})</>
+      ))}
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: var(--section-y) var(--space-md);
+    background: var(--sand);
+    color: var(--ink);
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+
+  .footer__heading {
+    margin-bottom: var(--space-xs);
+    font-size: var(--size-h3);
+  }
+
+  .footer__contact,
+  .footer__address {
+    font-size: 1.05rem;
+    font-style: normal;
+    line-height: 1.7;
+  }
+
+  .footer__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1.05rem;
+    line-height: 2;
+  }
+
+  .footer__legal {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--rule);
+  }
+
+  .footer__legal p {
+    margin: 0;
+    font-size: var(--size-small);
+    opacity: 0.8;
+  }
+</style>

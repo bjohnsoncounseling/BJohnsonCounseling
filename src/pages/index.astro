@@ -1,17 +1,272 @@
 ---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import { addressOneLine, address, areaServed, memberships, practitioner } from '../config/site';
 
+import heroTree from '../assets/images/hero-tree.jpg';
+import mtHood from '../assets/images/mt-hood.jpg';
+import headshot from '../assets/images/headshot-brandon.jpeg';
+import serviceIndividual from '../assets/images/service-individual.jpeg';
+import serviceTrauma from '../assets/images/service-trauma.jpeg';
+import serviceCouples from '../assets/images/service-couples.jpg';
+
+const services = [
+  { title: 'Individual Counseling', image: serviceIndividual, alt: 'Two people sitting across a small table, each holding a mug, in conversation.' },
+  { title: 'Trauma Counseling', image: serviceTrauma, alt: 'A person looking out toward a snow-capped mountain framed by evergreens.' },
+  { title: 'Couples Counseling', image: serviceCouples, alt: 'Two people resting side by side on a blanket in a pine forest.' },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Brandon Johnson Counseling" bareTitle>
+  <section class="hero">
+    <Image
+      src={heroTree}
+      alt="A broad tree in full leaf on a sunlit lawn, backlit by morning light."
+      class="hero__image"
+      widths={[600, 1000]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <div class="hero__body container">
+      <h1>Welcome</h1>
+      <p class="hero__lede measure">
+        I invite you to explore how you and I can partner to shine a light on the path
+        forward to healing, growth, and peace.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container intro">
+      <div class="intro__text prose">
+        <p>
+          My approach starts with respecting each person&rsquo;s story and perspective and
+          builds toward goals from there. Whether in relationship with yourself, your
+          partner, your children, or others in your life, sometimes you get stuck in loops
+          and can&rsquo;t seem to break free. Working free of those cycles can be hard to do on
+          your own, and my job is to partner with you in untangling the knots, making sense
+          of it all, and helping you explore the path to where you&rsquo;d rather be.
+        </p>
+        <Button href="/about">Learn More</Button>
+      </div>
+
+      <figure class="intro__figure">
+        <Image src={mtHood} alt="Mount Hood under clear skies, seen across a forested ridge." widths={[582, 1164]} sizes="(max-width: 60rem) 90vw, 36rem" />
+        <figcaption>Mt. Hood by Zach Dischner</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="container center measure-center">
+      <h2>Providing you with a space for peace and transformation</h2>
+      <p class="measure-center-p">
+        I have experience responding to each situation&rsquo;s unique needs and guiding
+        participants toward experiencing the changes they&rsquo;re looking for and the peace
+        they need.
+      </p>
+      <Button href="/my-approach">My Approach</Button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container measure">
+      <h2>Location</h2>
+      <p>
+        I offer in person appointments at my office in {address.neighborhood} ({address.street}).
+        I also offer remote appointments by video call for clients located anywhere in {areaServed.join(' or ')}.
+      </p>
+      <p>
+        <a
+          class="map-link"
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressOneLine)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View {addressOneLine} on Google Maps
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--slate">
+    <div class="container">
+      <h2 class="center">My services</h2>
+      <ul class="services">
+        {
+          services.map((service) => (
+            <li class="services__item">
+              <Image src={service.image} alt={service.alt} widths={[300, 600]} sizes="(max-width: 48rem) 80vw, 20rem" />
+              <h3>{service.title}</h3>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="center"><Button href="/services" variant="outline">Learn More</Button></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container who">
+      <Image src={headshot} alt={`${practitioner.name}, standing outdoors in front of a flowering tree.`} class="who__photo" widths={[476, 952]} sizes="(max-width: 60rem) 70vw, 30rem" />
+      <div class="who__text prose">
+        <h2>Who I am</h2>
+        <p class="who__credentials">
+          <strong>{practitioner.name}</strong> {practitioner.pronouns}, {practitioner.degree}<br />
+          {practitioner.licenses.map((l) => (
+            <>{l.title.includes('Marriage') ? 'LMFT' : 'LMHC'} ({l.state}: {l.number})<br /></>
+          ))}
+        </p>
+        <p>
+          I&rsquo;m a Licensed Marriage and Family Therapist (LMFT) with the state of Oregon and
+          a Licensed Mental Health Counselor (LMHC) with the state of Washington. I hold a
+          Master of Arts in Marriage, Couple and Family Counseling. I specialize in working
+          with individuals, couples, and relationships around conflict, anxiety, depression,
+          and relationally based trauma (including C-PTSD), dissociation (including OSDD and
+          DID), history of abuse, religious trauma and faith deconstruction.
+        </p>
+        <Button href="/who-i-am">Learn More</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--sand center">
+    <div class="container">
+      <h2>Get started together</h2>
+      <Button href="/contact">Book a Consultation</Button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="center">Memberships and Affiliations</h2>
+      <ul class="memberships">
+        {
+          memberships.map((m) => (
+            <li>
+              <a href={m.url} target="_blank" rel="noopener noreferrer">{m.name}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    min-height: clamp(28rem, 62vh, 44rem);
+    isolation: isolate;
+  }
+
+  .hero__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+  /* The hero photo is bright at the base, where the copy sits. */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(31, 38, 37, 0.72) 0%, rgba(31, 38, 37, 0.28) 45%, rgba(31, 38, 37, 0.08) 100%);
+    z-index: -1;
+  }
+
+  .hero__body {
+    align-self: end;
+    padding-block: var(--space-lg);
+    color: var(--on-dark);
+  }
+
+  .hero__body h1 {
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero__lede {
+    margin: 0;
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.3rem);
+  }
+
+  .intro {
+    display: grid;
+    gap: var(--space-lg);
+    align-items: center;
+    grid-template-columns: 1fr;
+  }
+
+  .intro__figure {
+    margin: 0;
+  }
+
+  .intro__figure figcaption {
+    margin-top: var(--space-2xs);
+    font-size: var(--size-small);
+    opacity: 0.75;
+  }
+
+  .measure-center {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+
+  .map-link {
+    font-size: 1.05rem;
+  }
+
+  .services {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    margin: var(--space-lg) 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .services__item h3 {
+    margin-top: var(--space-sm);
+    font-size: 1.35rem;
+  }
+
+  .who {
+    display: grid;
+    gap: var(--space-lg);
+    align-items: center;
+    grid-template-columns: 1fr;
+  }
+
+  .who__credentials {
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .memberships {
+    display: grid;
+    gap: var(--space-sm) var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+    font-size: 1.05rem;
+  }
+
+  @media (min-width: 60rem) {
+    .intro {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .who {
+      grid-template-columns: 22rem 1fr;
+    }
+  }
+</style>

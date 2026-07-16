@@ -7,14 +7,41 @@ import { addressOneLine, address, areaServed, memberships, practitioner } from '
 import heroTree from '../assets/images/hero-tree.jpg';
 import mtHood from '../assets/images/mt-hood.jpg';
 import headshot from '../assets/images/headshot-brandon.jpeg';
-import serviceIndividual from '../assets/images/service-individual.jpeg';
-import serviceTrauma from '../assets/images/service-trauma.jpeg';
+import serviceIndividual from '../assets/images/service-individual.jpg';
+import serviceTrauma from '../assets/images/service-trauma.jpg';
 import serviceCouples from '../assets/images/service-couples.jpg';
+import badgeTherapyDen from '../assets/images/badge-therapyden.png';
+import badgePtc from '../assets/images/badge-ptc.png';
+import badgeMft from '../assets/images/badge-mft.png';
 
+const badges = [
+  { image: badgeTherapyDen, alt: 'Proud Member of TherapyDen', href: 'https://www.therapyden.com/' },
+  { image: badgePtc, alt: 'Portland Therapy Center Member', href: 'https://www.portlandtherapycenter.com/' },
+  { image: badgeMft, alt: 'Couples Counselor — Marriage and Family Therapist', href: 'https://www.aamft.org/' },
+];
+
+/**
+ * Service imagery is free-licensed (Unsplash / Pexels License, commercial use,
+ * no attribution required). It replaces the Squarespace template stock the old
+ * site used, whose licence did not travel with us. Alt text is written from the
+ * photographs themselves.
+ */
 const services = [
-  { title: 'Individual Counseling', image: serviceIndividual, alt: 'Two people sitting across a small table, each holding a mug, in conversation.' },
-  { title: 'Trauma Counseling', image: serviceTrauma, alt: 'A person looking out toward a snow-capped mountain framed by evergreens.' },
-  { title: 'Couples Counseling', image: serviceCouples, alt: 'Two people resting side by side on a blanket in a pine forest.' },
+  {
+    title: 'Individual Counseling',
+    image: serviceIndividual,
+    alt: 'A lone figure in a pale poncho walking through a mossy evergreen forest.',
+  },
+  {
+    title: 'Trauma Counseling',
+    image: serviceTrauma,
+    alt: 'A snow-capped peak catching the first warm light of sunrise above an evergreen ridge.',
+  },
+  {
+    title: 'Couples Counseling',
+    image: serviceCouples,
+    alt: 'Two people holding hands across a wooden table, coffee cups beside them.',
+  },
 ];
 ---
 
@@ -53,8 +80,17 @@ const services = [
       </div>
 
       <figure class="intro__figure">
-        <Image src={mtHood} alt="Mount Hood under clear skies, seen across a forested ridge." widths={[582, 1164]} sizes="(max-width: 60rem) 90vw, 36rem" />
-        <figcaption>Mt. Hood by Zach Dischner</figcaption>
+        <Image src={mtHood} alt="Mount Hood at sunset, its snow-covered peak glowing above a dark ridge of evergreens." widths={[582, 1164]} sizes="(max-width: 60rem) 90vw, 36rem" />
+        {/* CC BY 2.0 requires credit to the author with a link to the source and
+            the licence. The old site credited "Zach Daschner" — a misspelling —
+            with no link to either. */}
+        <figcaption>
+          <a href="https://www.flickr.com/photos/zachd1_618/8081466807" target="_blank" rel="noopener noreferrer">Mt. Hood</a>{' '}
+          by{' '}
+          <a href="https://www.flickr.com/photos/zachd1_618/" target="_blank" rel="noopener noreferrer">Zach Dischner</a>
+          {', '}
+          <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>
+        </figcaption>
       </figure>
     </div>
   </section>
@@ -147,6 +183,18 @@ const services = [
           memberships.map((m) => (
             <li>
               <a href={m.url} target="_blank" rel="noopener noreferrer">{m.name}</a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <ul class="badges">
+        {
+          badges.map((b) => (
+            <li>
+              <a href={b.href} target="_blank" rel="noopener noreferrer">
+                <Image src={b.image} alt={b.alt} widths={[160, 320]} sizes="10rem" />
+              </a>
             </li>
           ))
         }
@@ -258,6 +306,22 @@ const services = [
     list-style: none;
     text-align: center;
     font-size: 1.05rem;
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: center;
+    margin: var(--space-lg) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .badges img {
+    width: auto;
+    max-height: 6.5rem;
   }
 
   @media (min-width: 60rem) {

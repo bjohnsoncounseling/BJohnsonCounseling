@@ -23,7 +23,7 @@ export const site = {
   url: 'https://bjohnsoncounseling.com',
   /** Keep under ~155 characters or search results truncate the tail. */
   description:
-    'Individual, couples, and family counseling for anyone feeling stuck in a cycle. SE Portland office, plus remote appointments across Oregon and Washington.',
+    'Individual and couples counseling for anyone feeling stuck in a cycle. SE Portland office, plus remote appointments across Oregon and Washington.',
 } as const;
 
 export const practitioner = {
@@ -62,13 +62,13 @@ export const areaServed = ['Oregon', 'Washington'] as const;
 export const rates = [
   {
     title: '50-minute Online Appointment',
-    body: 'Online appointments for couples, individuals, and families. Typically, meetings are weekly or bi-weekly.',
+    body: 'Online appointments for couples and individuals. Typically, meetings are weekly or bi-weekly.',
     duration: '50 mins',
     price: '$175',
   },
   {
     title: 'In-person Appointments',
-    body: 'Office appointments for couples, individuals, and families. Typically, meetings are weekly or bi-weekly.',
+    body: 'Office appointments for couples and individuals. Typically, meetings are weekly or bi-weekly.',
     duration: '50 mins',
     price: '$175',
   },

@@ -21,8 +21,9 @@ export const unavailableNotice =
 export const site = {
   name: 'Brandon Johnson Counseling',
   url: 'https://bjohnsoncounseling.com',
+  /** Keep under ~155 characters or search results truncate the tail. */
   description:
-    'Individual, Couples, and Family Counseling for anyone feeling stuck in a cycle and desiring to find freedom. Based in SE Portland, with remote appointments across Oregon and Washington.',
+    'Individual, couples, and family counseling for anyone feeling stuck in a cycle. SE Portland office, plus remote appointments across Oregon and Washington.',
 } as const;
 
 export const practitioner = {

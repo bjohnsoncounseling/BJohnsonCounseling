@@ -1,5 +1,9 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  "exclude": ["dist"],
+  "compilerOptions": {
+    // PagesFunction and the Cloudflare runtime globals used by functions/api/*.
+    "types": ["@cloudflare/workers-types"]
+  }
 }

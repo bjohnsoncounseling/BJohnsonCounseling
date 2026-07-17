@@ -75,9 +75,6 @@ export const rates = [
 ] as const;
 
 export const insurers = [
-  'OHP CareOregon',
-  'OHP Trillium',
-  'OHP Open Card',
   'Aetna',
   'Blue Cross/Blue Shield',
   'First Choice Health Network',

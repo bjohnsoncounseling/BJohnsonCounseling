@@ -54,6 +54,10 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
     justify-content: space-between;
     gap: var(--space-sm) var(--space-md);
     padding-block: var(--space-sm);
+    /* The header bar spans the full width (logo left, nav right), rather than
+       being confined to the body content column like everything else. Only the
+       page gutter (from .container) insets it from the edges. */
+    max-width: none;
   }
 
   .header__logo {
@@ -178,9 +182,6 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
 
     .header__inner {
       flex-wrap: nowrap; /* never drop the nav onto a second row */
-      /* The header bar runs a little wider than the body content column so the
-         wide wordmark, six links, and CTA sit comfortably in one row. */
-      max-width: 78rem;
     }
 
     /* Desktop logo is sized by height, so its wide aspect doesn't dominate the

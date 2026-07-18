@@ -55,6 +55,7 @@
   --btn-tracking: 0.1em;
   --btn-size: 0.96rem;
 
-  /* Nav collapses to a hamburger here, matching current behavior */
-  --bp-nav: 60rem;
+  /* Nav collapses to a hamburger below this. Set where the logo + six links +
+     CTA stop fitting in one row. Media queries hardcode 77rem to match. */
+  --bp-nav: 77rem;
 }

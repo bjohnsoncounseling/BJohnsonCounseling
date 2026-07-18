@@ -57,11 +57,16 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
   }
 
   .header__logo {
-    flex: 0 1 32.5rem;
+    flex: 0 1 auto;
     min-width: 0;
+    /* Mobile: shrink with the viewport so the toggle always has room. The
+       wordmark is a very wide 10.4:1, so it's sized by width here and by a
+       fixed height on desktop (see the desktop media query). */
+    max-width: min(17rem, 62vw);
   }
 
   .header__logo img {
+    display: block;
     width: 100%;
     height: auto;
   }
@@ -127,6 +132,7 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
   .nav__list a {
     font-size: 1rem;
     text-decoration: none;
+    white-space: nowrap; /* keep each label on one line (e.g. "My Approach") */
   }
 
   .nav__list a:hover,
@@ -134,13 +140,10 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
     text-decoration: underline;
   }
 
-  /* Collapsed: nav is hidden behind the toggle and stacks vertically. */
-  @media (max-width: 59.999rem) {
-    .header__logo {
-      flex: 1 1 auto;
-      max-width: 20rem;
-    }
-
+  /* Collapsed: nav is hidden behind the toggle and stacks vertically. Below the
+     desktop breakpoint there isn't room for the logo, six links, and the CTA in
+     one row, so the horizontal nav only appears at >= 77rem (see below). */
+  @media (max-width: 76.999rem) {
     .nav {
       display: none;
       flex-basis: 100%;
@@ -167,21 +170,42 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
     }
   }
 
-  /* Expanded: full horizontal nav plus the CTA, matching the live desktop header. */
-  @media (min-width: 60rem) {
+  /* Expanded: logo, all six links, and the CTA in a single row. */
+  @media (min-width: 77rem) {
     .header__toggle {
       display: none;
+    }
+
+    .header__inner {
+      flex-wrap: nowrap; /* never drop the nav onto a second row */
+      /* The header bar runs a little wider than the body content column so the
+         wide wordmark, six links, and CTA sit comfortably in one row. */
+      max-width: 78rem;
+    }
+
+    /* Desktop logo is sized by height, so its wide aspect doesn't dominate the
+       row. ~34px tall leaves room for the nav and CTA within the content width. */
+    .header__logo {
+      flex: 0 0 auto;
+      max-width: none;
+    }
+
+    .header__logo img {
+      width: auto;
+      height: 2.125rem;
     }
 
     .nav {
       display: flex;
       align-items: center;
-      gap: var(--space-md);
+      gap: 1.5rem;
     }
 
     .nav__list {
+      flex-wrap: nowrap;
       justify-content: flex-end;
-      max-width: 26rem;
+      gap: 0.9rem;
+      max-width: none;
     }
   }
 </style>

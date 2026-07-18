@@ -75,23 +75,23 @@ const errorReasons: Record<string, string> = {
     <div class="form__row">
       <p class="field">
         <label for="firstName">First Name</label>
-        <input id="firstName" name="firstName" type="text" autocomplete="given-name" required />
+        <input id="firstName" name="firstName" type="text" autocomplete="given-name" maxlength="100" required />
       </p>
       <p class="field">
         <label for="lastName">Last Name</label>
-        <input id="lastName" name="lastName" type="text" autocomplete="family-name" required />
+        <input id="lastName" name="lastName" type="text" autocomplete="family-name" maxlength="100" required />
       </p>
     </div>
   </fieldset>
 
   <p class="field">
     <label for="phone">Phone</label>
-    <input id="phone" name="phone" type="tel" autocomplete="tel" />
+    <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
   </p>
 
   <p class="field">
     <label for="email">Email <span class="req">(required)</span></label>
-    <input id="email" name="email" type="email" autocomplete="email" required />
+    <input id="email" name="email" type="email" autocomplete="email" maxlength="200" required />
   </p>
 
   <p class="field">
@@ -104,7 +104,7 @@ const errorReasons: Record<string, string> = {
 
   <p class="field">
     <label for="message">Message <span class="req">(required)</span></label>
-    <textarea id="message" name="message" rows="6" required></textarea>
+    <textarea id="message" name="message" rows="6" maxlength="5000" required></textarea>
   </p>
 
   {/* Honeypot: a real person never fills this; bots usually do. Hidden from
@@ -224,7 +224,7 @@ const errorReasons: Record<string, string> = {
     padding: var(--btn-padding);
     border: 0;
     border-radius: 0;
-    background: var(--accent);
+    background: var(--accent-strong);
     color: var(--on-dark);
     font-family: var(--font-body);
     font-size: var(--btn-size);
@@ -235,7 +235,7 @@ const errorReasons: Record<string, string> = {
   }
 
   .form__submit:hover {
-    background: var(--accent-hover);
+    background: var(--accent-strong-hover);
   }
 
   @media (min-width: 32rem) {

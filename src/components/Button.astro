@@ -29,12 +29,12 @@ const { href, variant = 'solid', class: className = '' } = Astro.props;
   }
 
   .btn--solid {
-    background: var(--accent);
+    background: var(--accent-strong);
     color: var(--on-dark);
   }
 
   .btn--solid:hover {
-    background: var(--accent-hover);
+    background: var(--accent-strong-hover);
   }
 
   .btn--outline {
@@ -44,8 +44,8 @@ const { href, variant = 'solid', class: className = '' } = Astro.props;
   }
 
   .btn--outline:hover {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
     color: var(--on-dark);
   }
 </style>

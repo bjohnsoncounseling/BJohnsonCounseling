@@ -7,15 +7,18 @@
   /* Palette */
   --ink: #3f4a49; /* body text — dark slate-green */
   --sand: #dcd9d0; /* header background — warm neutral */
-  --accent: #d4967d; /* buttons — terracotta */
+  --accent: #d4967d; /* decorative terracotta — borders, gradients, accents */
   --slate: #495a58; /* dark section backgrounds (e.g. "My services") */
   --bg: #ffffff;
   --on-dark: #ffffff;
 
-  /* Derived. Terracotta on white is ~2.3:1 — fine for a button face, far too
-     low for text. --accent-text is darkened to clear 4.5:1 for links on white. */
-  --accent-hover: #c07f63;
-  --accent-text: #a35c3e;
+  /* Button + link terracotta. The brand terracotta (#d4967d) is only ~2.5:1 with
+     white text — fails WCAG AA — so buttons use a darkened shade that clears 4.5:1
+     while staying visually in the same family. --accent-text does the same for
+     links on white. */
+  --accent-strong: #a85a3c; /* button bg: white text = 5.01:1 */
+  --accent-strong-hover: #904b30;
+  --accent-text: #a35c3e; /* link text on white = 5.05:1 */
   --rule: rgba(63, 74, 73, 0.18);
 
   /* Type. Heading face is set in one place so Phase 2's comparison resolves to

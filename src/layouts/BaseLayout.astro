@@ -5,7 +5,7 @@ import '../styles/global.css';
 
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { address, areaServed, contact, practitioner, site } from '../config/site';
+import { address, addressOneLine, areaServed, contact, practitioner, site } from '../config/site';
 
 interface Props {
   title: string;
@@ -34,6 +34,8 @@ const jsonLd = {
       '@id': `${site.url}/#practice`,
       name: site.name,
       url: site.url,
+      image: `${site.url}/og-image.jpg`,
+      logo: `${site.url}/icon-512.png`,
       email: contact.email,
       telephone: contact.phone,
       faxNumber: contact.fax,
@@ -46,6 +48,12 @@ const jsonLd = {
         postalCode: address.zip,
         addressCountry: address.country,
       },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 45.5189136,
+        longitude: -122.5756095,
+      },
+      hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressOneLine)}`,
       areaServed: areaServed.map((name) => ({ '@type': 'State', name })),
       founder: { '@id': `${site.url}/#brandon` },
     },
@@ -76,9 +84,11 @@ const jsonLd = {
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {/* Brandon's own icon, pulled from the Squarespace site. Squarespace served
-        it as JPEG despite the .ico name, hence the extension and type here. */}
-    <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
+    {/* Favicon set generated from Brandon's 751px mountain mark (Browser Icon.png). */}
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#dcd9d0" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta property="og:site_name" content={site.name} />

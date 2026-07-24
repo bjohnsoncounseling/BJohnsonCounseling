@@ -1,0 +1,45 @@
+# bjohnsoncounseling.com contact-form backend.
+#
+# A standalone Cloudflare Worker (NOT a Pages Function — Pages Functions don't
+# support the send_email binding). Deployed separately from the site with
+# `npm run deploy` in this directory; see README.md for the one-time dashboard
+# setup (Email Routing destination, Turnstile secret, deploy).
+#
+# The route only attaches once bjohnsoncounseling.com is served through
+# Cloudflare (i.e. after the DNS migration). Worker routes take precedence over
+# Pages on the same path, so /api/contact is served by this Worker while
+# everything else stays on Pages.
+
+name = "bjc-contact-form"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+routes = [
+  { pattern = "bjohnsoncounseling.com/api/contact", zone_name = "bjohnsoncounseling.com" },
+  { pattern = "www.bjohnsoncounseling.com/api/contact", zone_name = "bjohnsoncounseling.com" }
+]
+
+# Email Routing send binding. The recipient inbox is set as the DEST_EMAIL
+# secret so a personal address never lands in the public repo. Cloudflare still
+# requires it to be a verified Email Routing destination address on this zone.
+[[send_email]]
+name = "CONTACT_EMAIL"
+
+# Per-IP cap on submissions (Workers rate-limiting binding — no dashboard rule
+# needed): over the limit -> 429 with a "wait a minute" message. Best-effort per
+# Cloudflare location — a cost cap, not a security boundary; Turnstile is the
+# real bot gate.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "2001"
+simple = { limit = 5, period = 60 }
+
+[vars]
+# The sender identity. Must be on a domain with Email Routing enabled (this
+# zone). It does not need to exist as an actual mailbox or routing rule.
+FROM_EMAIL = "contact@bjohnsoncounseling.com"
+
+# Secrets (set once with `npx wrangler secret put <NAME>` — see README.md):
+#   TURNSTILE_SECRET — the SECRET key of the site's Turnstile widget
+#   DEST_EMAIL       — the inbox that receives messages (a verified Email
+#                      Routing destination address, e.g. brandon@bjohnsoncounseling.com)

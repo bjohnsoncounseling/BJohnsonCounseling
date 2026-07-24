@@ -1,0 +1,17 @@
+{
+  "name": "bjc-contact-form",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker backend for the bjohnsoncounseling.com contact form (Turnstile verify + Email Routing send).",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "wrangler deploy --dry-run --outdir=.wrangler-check"
+  },
+  "dependencies": {
+    "mimetext": "^3.0.27"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

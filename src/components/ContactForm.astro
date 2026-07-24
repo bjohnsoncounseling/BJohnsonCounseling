@@ -1,5 +1,5 @@
 ---
-import { contact, serviceOptions } from '../config/site';
+import { contact, serviceOptions, turnstileSiteKey } from '../config/site';
 
 /**
  * The Cloudflare function redirects back here with ?submitted=ok|error so the
@@ -10,6 +10,7 @@ const errorReasons: Record<string, string> = {
   missing: 'Please fill in every required field.',
   email: 'That email address doesn’t look right — please check it.',
   verification: 'We couldn’t verify that you’re human. Please try again.',
+  ratelimited: 'That’s a few messages in a short time. Please wait a minute and try again.',
   send: 'Something went wrong on our end and the message wasn’t sent.',
   malformed: 'Something went wrong with that submission. Please try again.',
 };
@@ -25,16 +26,17 @@ const errorReasons: Record<string, string> = {
   </p>
 </div>
 
-{/* Deferred until the document is parsed: this script sits above the <form> in
-    the DOM, so running it inline would query for an element that doesn't exist
-    yet and silently leave the form on screen after a successful send. */}
+{/* Deferred until the document is parsed: this script sits above the <form>, so
+    running it immediately would query for elements that don't exist yet. Two
+    jobs: (1) reveal the status banner when we land back here from the no-JS
+    native POST (?submitted=...); (2) progressively enhance the form so visitors
+    with JS submit via fetch and see the result inline, with no full-page
+    navigation. The fetch path is also what lets us confirm the Turnstile token
+    is present before bothering the server. */}
 <script is:inline define:vars={{ errorReasons }}>
   (() => {
-    const apply = () => {
-      const params = new URLSearchParams(window.location.search);
-      const submitted = params.get('submitted');
-      if (!submitted) return;
-
+    // Shared success/error UI for both paths — reuses the one status banner.
+    const showBanner = (status, reason) => {
       const box = document.querySelector('[data-status]');
       const ok = document.querySelector('[data-status-ok]');
       const err = document.querySelector('[data-status-error]');
@@ -43,21 +45,79 @@ const errorReasons: Record<string, string> = {
       if (!box) return;
 
       box.hidden = false;
-      if (submitted === 'ok') {
+      if (status === 'ok') {
         if (ok) ok.hidden = false;
+        if (err) err.hidden = true;
         if (form) form.hidden = true;
       } else {
         if (err) err.hidden = false;
-        if (msg) msg.textContent = errorReasons[params.get('reason')] || 'Something went wrong.';
+        if (ok) ok.hidden = true;
+        if (msg) msg.textContent = errorReasons[reason] || 'Something went wrong.';
       }
       box.setAttribute('tabindex', '-1');
       box.focus();
     };
 
+    const enhance = () => {
+      const form = document.querySelector('.form');
+      const submit = form && form.querySelector('.form__submit');
+      if (!form || !submit) return;
+
+      const needsTurnstile = !!form.querySelector('.cf-turnstile');
+      const label = submit.textContent;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        if (needsTurnstile) {
+          const token = form.querySelector('[name="cf-turnstile-response"]');
+          if (!token || !token.value) {
+            showBanner('error', 'verification');
+            return;
+          }
+        }
+
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'application/json' },
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok !== false) {
+            showBanner('ok');
+            return; // the form is hidden now; nothing left to reset
+          }
+          showBanner('error', data.error);
+        } catch {
+          showBanner('error', 'send');
+        }
+
+        // Turnstile tokens are single-use — the server consumed this one either
+        // way, so the next attempt needs a fresh pass.
+        if (window.turnstile) window.turnstile.reset('#contact-turnstile');
+        submit.disabled = false;
+        submit.textContent = label;
+      });
+    };
+
+    const init = () => {
+      const params = new URLSearchParams(window.location.search);
+      const submitted = params.get('submitted');
+      if (submitted) showBanner(submitted === 'ok' ? 'ok' : 'error', params.get('reason'));
+      enhance();
+    };
+
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', apply);
+      document.addEventListener('DOMContentLoaded', init);
     } else {
-      apply();
+      init();
     }
   })();
 </script>
@@ -113,6 +173,17 @@ const errorReasons: Record<string, string> = {
     <label for="company">Company</label>
     <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
   </p>
+
+  {/* Cloudflare Turnstile — renders only when a public site key is configured
+      (src/config/site.ts). The widget auto-inserts the hidden
+      "cf-turnstile-response" input the Pages Function verifies server-side.
+      Without a key the form falls back to the honeypot alone. */}
+  {turnstileSiteKey && (
+    <Fragment>
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      <div id="contact-turnstile" class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+    </Fragment>
+  )}
 
   <button type="submit" class="form__submit">Send</button>
 </form>
@@ -218,6 +289,10 @@ const errorReasons: Record<string, string> = {
     width: 1px;
     height: 1px;
     overflow: hidden;
+  }
+
+  .cf-turnstile {
+    margin: 0 0 var(--space-sm);
   }
 
   .form__submit {

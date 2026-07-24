@@ -9,8 +9,9 @@
  */
 
 /**
- * Controls the "not accepting new clients" notice, the CTA wording, and whether
- * the contact form renders. Flip this one value and push; the deploy is automatic.
+ * Controls the "not accepting new clients" notice on the contact page and the
+ * CTA wording. Flip this one value and push; the deploy is automatic. (The
+ * contact form itself always renders — questions are welcome either way.)
  */
 export const acceptingNewClients = false;
 
@@ -111,5 +112,17 @@ export const serviceOptions = [
   'Couples Counseling',
   'EMDR/Trauma Therapy',
 ] as const;
+
+/**
+ * Public Cloudflare Turnstile site key for the contact form's spam check. This
+ * is the PUBLIC key and is safe to commit; the matching SECRET key lives only
+ * in the Cloudflare Pages environment as TURNSTILE_SECRET. Leave this empty and
+ * the widget won't render — the form falls back to the honeypot alone. Create a
+ * widget at Cloudflare dashboard → Turnstile and paste its Site Key here.
+ *
+ * For local testing use Turnstile's "always passes" test key,
+ * '1x00000000000000000000AA' (it renders on any hostname, including localhost).
+ */
+export const turnstileSiteKey = '';
 
 export const addressOneLine = `${address.street}, ${address.city}, ${address.state} ${address.zip}`;

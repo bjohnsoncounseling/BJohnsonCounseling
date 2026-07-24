@@ -16,6 +16,10 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+# wrangler local secrets, state, and dry-run output (workers/contact-form/)
+.dev.vars
+.wrangler/
+.wrangler-check/
 
 # macOS-specific files
 .DS_Store

@@ -19,12 +19,22 @@ export const acceptingNewClients = false;
 export const unavailableNotice =
   'I currently do not have availability for new clients. Questions are always welcome, and feel free to check back soon. I wish you well as you explore, and I hope you find the right person for you.';
 
+/**
+ * Shows or hides everything couples-counseling across the site: the service
+ * cards on the homepage and Services page, the contact form option, the
+ * techniques list, and the "couples" wording in rates, bio, and meta
+ * descriptions. The copy and photo all stay in the codebase — flip this to
+ * true and push to bring it all back.
+ */
+export const offerCouplesCounseling = false;
+
 export const site = {
   name: 'Brandon Johnson Counseling',
   url: 'https://bjohnsoncounseling.com',
   /** Keep under ~155 characters or search results truncate the tail. */
-  description:
-    'Individual and couples counseling for anyone feeling stuck in a cycle. SE Portland office, plus remote appointments across Oregon and Washington.',
+  description: offerCouplesCounseling
+    ? 'Individual and couples counseling for anyone feeling stuck in a cycle. SE Portland office, plus remote appointments across Oregon and Washington.'
+    : 'Individual counseling and trauma therapy for anyone feeling stuck in a cycle. SE Portland office, plus remote appointments across Oregon and Washington.',
 } as const;
 
 export const practitioner = {
@@ -60,16 +70,18 @@ export const address = {
 /** Remote appointments are offered to clients located anywhere in these states. */
 export const areaServed = ['Oregon', 'Washington'] as const;
 
+const clientele = offerCouplesCounseling ? 'couples and individuals' : 'individuals';
+
 export const rates = [
   {
     title: '50-minute Online Appointment',
-    body: 'Online appointments for couples and individuals. Typically, meetings are weekly or bi-weekly.',
+    body: `Online appointments for ${clientele}. Typically, meetings are weekly or bi-weekly.`,
     duration: '50 mins',
     price: '$175',
   },
   {
     title: 'In-person Appointments',
-    body: 'Office appointments for couples and individuals. Typically, meetings are weekly or bi-weekly.',
+    body: `Office appointments for ${clientele}. Typically, meetings are weekly or bi-weekly.`,
     duration: '50 mins',
     price: '$175',
   },
@@ -109,9 +121,9 @@ export const nav = [
 /** Options in the contact form's "Service Requested" select. */
 export const serviceOptions = [
   'Individual Counseling',
-  'Couples Counseling',
+  ...(offerCouplesCounseling ? ['Couples Counseling'] : []),
   'EMDR/Trauma Therapy',
-] as const;
+];
 
 /**
  * Public Cloudflare Turnstile site key for the contact form's spam check. This

@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CTASection from '../components/CTASection.astro';
+import { offerCouplesCounseling } from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
 import serviceIndividual from '../assets/images/service-individual.jpg';
@@ -21,6 +22,7 @@ const services = [
     image: serviceCouples,
     alt: 'Two people holding hands across a wooden table, coffee cups beside them.',
     body: 'Couples sometimes get caught in patterns that push them apart from each other when they wish they were closer. Working through it can be painful or scary, and having someone to guide the process of renewing that closeness and trust can make all the difference. We’ll partner to find freedom from cycles of disconnection, connecting and understanding yourselves and each other, and building new patterns together.',
+    couples: true,
   },
   {
     title: 'Trauma Therapy',
@@ -28,12 +30,12 @@ const services = [
     alt: 'A snow-capped peak catching the first warm light of sunrise above an evergreen ridge.',
     body: "Trauma can leave deep imprints on our lives, often manifesting in ways that disrupt our sense of safety, connection, and self-worth. It can feel overwhelming, but healing is possible. In our work together, we'll create a safe space to explore and understand these experiences, allowing you to reclaim your sense of self and rewrite the narrative of your life. Whether it’s through processing difficult memories, restoring a sense of calm, or finding new pathways to resilience, we'll work together to heal and build a future grounded in strength and hope.",
   },
-];
+].filter((service) => offerCouplesCounseling || !service.couples);
 ---
 
 <BaseLayout
   title="Services"
-  description="Individual counseling, couples counseling, and trauma therapy with Brandon Johnson, LMFT/LMHC, in SE Portland and remotely across Oregon and Washington."
+  description={`Individual counseling${offerCouplesCounseling ? ', couples counseling,' : ''} and trauma therapy with Brandon Johnson, LMFT/LMHC, in SE Portland and remotely across Oregon and Washington.`}
 >
   <PageHero
     title="There’s a way forward, and finding it can be difficult. I’m here so we can do it together."

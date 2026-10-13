@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CTASection from '../components/CTASection.astro';
+import { offerCouplesCounseling } from '../config/site';
 
 import mtHood from '../assets/images/mt-hood.jpg';
 
@@ -27,7 +28,7 @@ const issues = [
 const techniques = [
   'Acceptance and Commitment Therapy (ACT)',
   'Attachment Theory',
-  'Couples Counseling',
+  ...(offerCouplesCounseling ? ['Couples Counseling'] : []),
   'EMDR (Eye-Movement Desensitization & Reprocessing Therapy)',
   'Emotionally Focused/Emotion-Focused Therapy',
   'Existential Psychotherapy',

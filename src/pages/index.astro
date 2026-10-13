@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
-import { addressOneLine, address, areaServed, memberships, practitioner } from '../config/site';
+import { addressOneLine, address, areaServed, memberships, offerCouplesCounseling, practitioner } from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
 import mtHood from '../assets/images/mt-hood.jpg';
@@ -17,7 +17,7 @@ import badgeMft from '../assets/images/badge-mft.png';
 const badges = [
   { image: badgeTherapyDen, alt: 'Proud Member of TherapyDen', href: 'https://www.therapyden.com/' },
   { image: badgePtc, alt: 'Portland Therapy Center Member', href: 'https://www.portlandtherapycenter.com/' },
-  { image: badgeMft, alt: 'Couples Counselor — Marriage and Family Therapist', href: 'https://www.aamft.org/' },
+  { image: badgeMft, alt: 'AAMFT Clinical Fellow', href: 'https://www.aamft.org/' },
 ];
 
 /**
@@ -41,8 +41,9 @@ const services = [
     title: 'Couples Counseling',
     image: serviceCouples,
     alt: 'Two people holding hands across a wooden table, coffee cups beside them.',
+    couples: true,
   },
-];
+].filter((service) => offerCouplesCounseling || !service.couples);
 ---
 
 <BaseLayout title="Brandon Johnson Counseling | Therapy in SE Portland" bareTitle>
@@ -134,7 +135,7 @@ const services = [
         {
           services.map((service) => (
             <li class="services__item">
-              <Image src={service.image} alt={service.alt} widths={[300, 600]} sizes="(max-width: 48rem) 80vw, 20rem" />
+              <Image src={service.image} alt={service.alt} widths={[300, 600, 1100]} sizes={`(max-width: 48rem) 80vw, ${services.length < 3 ? '34rem' : '20rem'}`} />
               <h3>{service.title}</h3>
             </li>
           ))
@@ -159,7 +160,7 @@ const services = [
           I&rsquo;m a Licensed Marriage and Family Therapist (LMFT) with the state of Oregon and
           a Licensed Mental Health Counselor (LMHC) with the state of Washington. I hold a
           Master of Arts in Marriage, Couple and Family Counseling. I specialize in working
-          with individuals, couples, and relationships around conflict, anxiety, depression,
+          with individuals{offerCouplesCounseling ? ', couples,' : ''} and relationships around conflict, anxiety, depression,
           and relationally based trauma (including C-PTSD), dissociation (including OSDD and
           DID), history of abuse, religious trauma and faith deconstruction.
         </p>

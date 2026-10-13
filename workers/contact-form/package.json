@@ -9,9 +9,9 @@
     "check": "wrangler deploy --dry-run --outdir=.wrangler-check"
   },
   "dependencies": {
-    "mimetext": "^3.0.27"
+    "mimetext": "^3.0.28"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.149.0"
   }
 }

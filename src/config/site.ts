@@ -10,14 +10,25 @@
 
 /**
  * Controls the "not accepting new clients" notice on the contact page and the
- * CTA wording. Flip this one value and push; the deploy is automatic. (The
- * contact form itself always renders — questions are welcome either way.)
+ * wording of every button that leads there (see `ctaLabels`). Flip this one
+ * value and push; the deploy is automatic. (The contact form itself always
+ * renders — questions are welcome either way.)
  */
 export const acceptingNewClients = false;
 
 /** Shown on the contact page when `acceptingNewClients` is false. */
 export const unavailableNotice =
   'I currently do not have availability for new clients. Questions are always welcome, and feel free to check back soon. I wish you well as you explore, and I hope you find the right person for you.';
+
+/**
+ * Labels for the buttons and links that lead to the contact page. While the
+ * practice is full they invite a question instead of promising a booking.
+ * `short` (header, About page) avoids plain "Contact", which would repeat the
+ * nav link beside the header button; `long` is for the closing CTA sections.
+ */
+export const ctaLabels = acceptingNewClients
+  ? { short: 'Get started', long: 'Book a Consultation' }
+  : { short: 'Get in touch', long: 'Get in Touch' };
 
 /**
  * Shows or hides everything couples-counseling across the site: the service

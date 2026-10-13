@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
-import { addressOneLine, address, areaServed, memberships, offerCouplesCounseling, practitioner } from '../config/site';
+import { addressOneLine, address, areaServed, ctaLabels, memberships, offerCouplesCounseling, practitioner } from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
 import mtHood from '../assets/images/mt-hood.jpg';
@@ -172,7 +172,7 @@ const services = [
   <section class="section section--sand center">
     <div class="container">
       <h2>Get started together</h2>
-      <Button href="/contact">Book a Consultation</Button>
+      <Button href="/contact">{ctaLabels.long}</Button>
     </div>
   </section>
 

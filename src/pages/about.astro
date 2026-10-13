@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CTASection from '../components/CTASection.astro';
 import Button from '../components/Button.astro';
-import { insurers, rates } from '../config/site';
+import { ctaLabels, insurers, rates } from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
 import officeSpace from '../assets/images/office-counseling-space.jpg';
@@ -79,7 +79,7 @@ const office = [
                 <span aria-hidden="true">|</span>
                 <strong>{rate.price}</strong>
                 <span aria-hidden="true">|</span>
-                <a href="/contact">Get started</a>
+                <a href="/contact">{ctaLabels.short}</a>
               </p>
             </article>
           ))
@@ -107,7 +107,7 @@ const office = [
         <a href="/contact">contact me</a> to see if we can find a solution that can work,
         possibly including a lower rate or referrals to other counselors.
       </p>
-      <p><Button href="/contact">Get started</Button></p>
+      <p><Button href="/contact">{ctaLabels.short}</Button></p>
     </div>
   </section>
 

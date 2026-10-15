@@ -12,7 +12,7 @@
  *   2. drops honeypot hits silently (a filled `company` field);
  *   3. validates the form fields;
  *   4. verifies the Cloudflare Turnstile token server-side (siteverify);
- *   5. sends via the Email Routing `send_email` binding, from FROM_EMAIL
+ *   5. sends via the `send_email` binding, from FROM_EMAIL
  *      (contact@bjohnsoncounseling.com) with Reply-To set to the submitter, to
  *      the verified destination inbox (DEST_EMAIL secret).
  *

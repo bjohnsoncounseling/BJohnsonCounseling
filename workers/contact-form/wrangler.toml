@@ -3,7 +3,7 @@
 # A standalone Cloudflare Worker (NOT a Pages Function — Pages Functions don't
 # support the send_email binding). Deployed separately from the site with
 # `npm run deploy` in this directory; see README.md for the one-time dashboard
-# setup (Email Routing destination, Turnstile secret, deploy).
+# setup (destination address, DNS records, Turnstile secret, deploy).
 #
 # The route only attaches once bjohnsoncounseling.com is served through
 # Cloudflare (i.e. after the DNS migration). Worker routes take precedence over
@@ -14,14 +14,24 @@ name = "bjc-contact-form"
 main = "src/index.js"
 compatibility_date = "2026-06-01"
 
+# The bjohnsoncounseling.com Cloudflare account (not the litbible one). Pinned so
+# `wrangler deploy` can't land in the wrong account when you're logged in to more
+# than one. Account IDs aren't secret.
+account_id = "3cd9c69cc979d425b2a6d0177cff83e1"
+
+# No public *.workers.dev URL — the Worker answers only on the routes below.
+workers_dev = false
+
 routes = [
   { pattern = "bjohnsoncounseling.com/api/contact", zone_name = "bjohnsoncounseling.com" },
   { pattern = "www.bjohnsoncounseling.com/api/contact", zone_name = "bjohnsoncounseling.com" }
 ]
 
-# Email Routing send binding. The recipient inbox is set as the DEST_EMAIL
-# secret so a personal address never lands in the public repo. Cloudflare still
-# requires it to be a verified Email Routing destination address on this zone.
+# Send-email binding. The recipient inbox is set as the DEST_EMAIL secret so a
+# personal address never lands in the public repo. It must be a verified
+# destination address on this Cloudflare account (Compute → Email Service →
+# Email Routing → Destination addresses). The domain itself is NOT onboarded to
+# Email Routing — that would replace the Google Workspace MX.
 [[send_email]]
 name = "CONTACT_EMAIL"
 
@@ -34,9 +44,16 @@ name = "RATE_LIMITER"
 namespace_id = "2001"
 simple = { limit = 5, period = 60 }
 
+# Workers Logs, so a failed send leaves its error behind (dashboard → Workers &
+# Pages → bjc-contact-form → Observability). The Worker never logs form fields —
+# only send/Turnstile/rate-limiter errors — so no message content is retained.
+[observability]
+enabled = true
+
 [vars]
-# The sender identity. Must be on a domain with Email Routing enabled (this
-# zone). It does not need to exist as an actual mailbox or routing rule.
+# The sender identity. It doesn't need to exist as a mailbox. Deliverability
+# depends on two DNS records on the zone (see README): the cf2024-1 DKIM key and
+# include:_spf.mx.cloudflare.net in the apex SPF.
 FROM_EMAIL = "contact@bjohnsoncounseling.com"
 
 # Secrets (set once with `npx wrangler secret put <NAME>` — see README.md):

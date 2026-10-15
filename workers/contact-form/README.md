@@ -22,35 +22,51 @@ form POST is handled here while everything else stays on Pages.
 
 ## One-time setup (owner, Cloudflare dashboard + CLI)
 
-This is the same setup already running for litbible.net.
+Same `send_email` pattern as the litbible.net Worker, verified end to end on
+this account on 2026-10-14.
 
-1. **Email Routing** (dashboard → bjohnsoncounseling.com → Email → Email Routing):
-   enable it, but **keep the existing Google Workspace MX records** — Email
-   Routing is used here only to *send*; incoming mail stays with Workspace. Then
-   add + **verify** your inbox as a *destination address* (Cloudflare emails a
-   confirmation link). `contact@bjohnsoncounseling.com` does **not** need to exist
-   as a routing rule — it's only the sender identity.
-2. **Turnstile** (dashboard → Turnstile → Add widget, Managed, hostname
+> **Do not onboard the domain to Email Routing.** Its "Activate" wizard adds
+> Cloudflare MX records (taking incoming mail away from Google Workspace) and
+> replaces the apex SPF record. Sending works without it.
+
+1. **Destination address** (dashboard → Compute → Email Service → Email Routing
+   → **Destination addresses**, at the account level — not inside the domain):
+   add + **verify** your inbox (Cloudflare emails a confirmation link).
+   `contact@bjohnsoncounseling.com` doesn't need to exist anywhere — it's only
+   the sender identity.
+2. **DNS records for deliverability** (dashboard → bjohnsoncounseling.com → DNS).
+   Cloudflare signs these messages as `d=bjohnsoncounseling.com; s=cf2024-1` and
+   sends from its `104.30.0.0/19` range. Without the two records below, Gmail
+   files them as spam ("sent from cloudflare-email.net"). Neither touches the
+   Google Workspace MX or DKIM.
+   - **TXT** `cf2024-1._domainkey` — Cloudflare's shared DKIM public key
+     (same value on every Cloudflare zone; copy it from an existing one, e.g.
+     `dig +short TXT cf2024-1._domainkey.liberatingscripture.org`).
+   - **Edit** the apex SPF TXT (don't add a second one) to
+     `v=spf1 include:_spf.google.com include:_spf.mx.cloudflare.net ~all`.
+3. **Turnstile** (dashboard → Turnstile → Add widget, Managed, hostname
    `bjohnsoncounseling.com`): copy the **Site Key** into
    `src/config/site.ts` (`turnstileSiteKey`, public by design) and keep the
-   **Secret Key** for step 4.
-3. **Install & authenticate** (in this directory):
+   **Secret Key** for step 5.
+4. **Install & authenticate** (in this directory):
 
    ```sh
    npm install
    npx wrangler login
    ```
 
-4. **Secrets:**
+   (In Windows PowerShell, use `npx.cmd` if script execution blocks `npx`.)
+
+5. **Secrets:**
 
    ```sh
-   npx wrangler secret put TURNSTILE_SECRET   # the Turnstile SECRET key (step 2)
+   npx wrangler secret put TURNSTILE_SECRET   # the Turnstile SECRET key (step 3)
    npx wrangler secret put DEST_EMAIL         # your inbox — the verified destination from step 1
    ```
 
    (On first `secret put`, wrangler offers to create the Worker — say yes.)
 
-5. **Deploy:**
+6. **Deploy:**
 
    ```sh
    npm run deploy
@@ -58,7 +74,7 @@ This is the same setup already running for litbible.net.
 
    The route in `wrangler.toml` attaches automatically.
 
-6. **Smoke test** on the live site: submit the form with JS on (inline success
+7. **Smoke test** on the live site: submit the form with JS on (inline success
    message), then once with JS disabled (should land back on
    `/contact/?submitted=ok`), and confirm both emails arrive with a working
    Reply-To.
@@ -83,7 +99,7 @@ This is the same setup already running for litbible.net.
 - `npm run check` bundles the Worker without deploying (no auth needed) — a
   CI-friendly sanity check.
 - Dead ends, so nobody re-litigates them: MailChannels-from-Workers shut down in
-  Aug 2024; Cloudflare Email Service (arbitrary recipients) is beta/paid and
-  unnecessary here — Email Routing's `send_email` binding to a verified
-  destination is free and sufficient, and (unlike enabling Email Routing's MX)
-  it does not disturb the domain's Google Workspace mail.
+  Aug 2024; Cloudflare Email Sending (arbitrary recipients) is beta and needs
+  Workers Paid — unnecessary here, since the `send_email` binding to a verified
+  destination is free. Onboarding the domain to Email Routing is also
+  unnecessary, and harmful: it would move the apex MX off Google Workspace.

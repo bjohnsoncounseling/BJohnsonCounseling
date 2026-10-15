@@ -88,7 +88,7 @@ export default {
     if (!looksLikeEmail(email)) return respond(400, "email");
 
     const token = String(form.get("cf-turnstile-response") || "");
-    if (!(await verifyTurnstile(env.TURNSTILE_SECRET, token, request))) {
+    if (!(await verifyTurnstile(env, token, request))) {
       return respond(403, "verification");
     }
 
@@ -154,27 +154,43 @@ function sentLine(request) {
   return `Sent ${new Date().toISOString()}`;
 }
 
-async function verifyTurnstile(secret, token, request) {
-  if (!token) return false;
+async function verifyTurnstile(env, token, request) {
+  // Real tokens are well under 2048 chars; anything else is junk.
+  if (!token || token.length > 2048) return false;
   try {
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       body: new URLSearchParams({
-        secret,
+        secret: env.TURNSTILE_SECRET,
         response: token,
         remoteip: request.headers.get("CF-Connecting-IP") || "",
       }),
+      signal: AbortSignal.timeout(10_000),
     });
     const verdict = await res.json();
     if (verdict.success !== true) {
-      // Only Turnstile's error codes — no submitter data. Visible in
-      // `wrangler tail`; distinguishes a misconfigured secret
-      // (invalid-input-secret) from a bad/expired token.
+      // Only Turnstile's error codes — no submitter data. Visible in Workers
+      // Logs; distinguishes a misconfigured secret (invalid-input-secret) from
+      // a bad/expired token.
       console.warn("turnstile rejected:", JSON.stringify(verdict["error-codes"] ?? []));
       return false;
     }
+    // A token minted for another action, or on another site that shares the
+    // widget (e.g. the pages.dev preview), must not unlock this form. The
+    // always-pass test secret returns neither field, so skip the checks when
+    // they're absent rather than locking out local testing.
+    if (verdict.action && verdict.action !== env.TURNSTILE_ACTION) {
+      console.warn("turnstile action mismatch:", verdict.action);
+      return false;
+    }
+    const allowed = String(env.TURNSTILE_HOSTNAMES || "").split(",").map((h) => h.trim());
+    if (verdict.hostname && !allowed.includes(verdict.hostname)) {
+      console.warn("turnstile hostname not allowed:", verdict.hostname);
+      return false;
+    }
     return true;
-  } catch {
+  } catch (err) {
+    console.warn("turnstile verify failed:", err && err.name);
     return false;
   }
 }

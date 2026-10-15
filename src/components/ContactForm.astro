@@ -1,5 +1,5 @@
 ---
-import { contact, serviceOptions, turnstileSiteKey } from '../config/site';
+import { contact, serviceOptions, turnstileAction, turnstileSiteKey } from '../config/site';
 
 /**
  * The Cloudflare function redirects back here with ?submitted=ok|error so the
@@ -176,12 +176,12 @@ const errorReasons: Record<string, string> = {
 
   {/* Cloudflare Turnstile — renders only when a public site key is configured
       (src/config/site.ts). The widget auto-inserts the hidden
-      "cf-turnstile-response" input the Pages Function verifies server-side.
-      Without a key the form falls back to the honeypot alone. */}
+      "cf-turnstile-response" input the contact-form Worker verifies server-side
+      (including that the token's action is `turnstileAction`). */}
   {turnstileSiteKey && (
     <Fragment>
       <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <div id="contact-turnstile" class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+      <div id="contact-turnstile" class="cf-turnstile" data-sitekey={turnstileSiteKey} data-action={turnstileAction}></div>
     </Fragment>
   )}
 

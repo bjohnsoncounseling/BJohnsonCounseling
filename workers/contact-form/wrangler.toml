@@ -55,6 +55,11 @@ enabled = true
 # depends on two DNS records on the zone (see README): the cf2024-1 DKIM key and
 # include:_spf.mx.cloudflare.net in the apex SPF.
 FROM_EMAIL = "contact@bjohnsoncounseling.com"
+# Turnstile claims the Worker accepts. TURNSTILE_ACTION must match
+# `turnstileAction` in src/config/site.ts. pages.dev is deliberately absent: the
+# widget renders there, but its tokens must not unlock the live form.
+TURNSTILE_ACTION = "contact"
+TURNSTILE_HOSTNAMES = "bjohnsoncounseling.com,www.bjohnsoncounseling.com"
 
 # Secrets (set once with `npx wrangler secret put <NAME>` — see README.md):
 #   TURNSTILE_SECRET — the SECRET key of the site's Turnstile widget

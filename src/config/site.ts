@@ -139,13 +139,17 @@ export const serviceOptions = [
 /**
  * Public Cloudflare Turnstile site key for the contact form's spam check. This
  * is the PUBLIC key and is safe to commit; the matching SECRET key lives only
- * in the Cloudflare Pages environment as TURNSTILE_SECRET. Leave this empty and
- * the widget won't render — the form falls back to the honeypot alone. Create a
- * widget at Cloudflare dashboard → Turnstile and paste its Site Key here.
+ * on the contact-form Worker as the TURNSTILE_SECRET secret. The Worker rejects
+ * any submission without a valid token, so emptying this would break the form.
+ * Widget: dashboard → Turnstile → "bjohnsoncounseling contact form" (hostnames
+ * bjohnsoncounseling.com and bjohnsoncounseling.pages.dev).
  *
  * For local testing use Turnstile's "always passes" test key,
  * '1x00000000000000000000AA' (it renders on any hostname, including localhost).
  */
-export const turnstileSiteKey = '';
+export const turnstileSiteKey = '0x4AAAAAAFXGtZHgNXqhyhfl';
+
+/** Turnstile action name; the Worker rejects tokens issued for any other action. */
+export const turnstileAction = 'contact';
 
 export const addressOneLine = `${address.street}, ${address.city}, ${address.state} ${address.zip}`;

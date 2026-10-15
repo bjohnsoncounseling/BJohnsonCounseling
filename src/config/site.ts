@@ -14,7 +14,7 @@
  * value and push; the deploy is automatic. (The contact form itself always
  * renders — questions are welcome either way.)
  */
-export const acceptingNewClients = false;
+export const acceptingNewClients = true;
 
 /** Shown on the contact page when `acceptingNewClients` is false. */
 export const unavailableNotice =

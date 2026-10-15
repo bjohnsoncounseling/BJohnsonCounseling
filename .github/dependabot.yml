@@ -1,0 +1,60 @@
+# Dependabot version updates.
+#
+# Two independent npm trees, each with its own package-lock.json. The worker's
+# lockfile is never touched by a root `npm install`, so it needs its own entry.
+#
+# Shape of each stream:
+#   - Weekly, Mondays. Minor + patch bumps are bundled into ONE PR.
+#   - Majors are deliberately NOT grouped: each gets its own PR so it can be
+#     read and tested on its own instead of riding along in a bundle.
+#   - 0.x packages are excluded from the bundle (see below) and so also get
+#     one PR per release.
+#   - No `commit-message` prefix: this repo's history is plain imperative
+#     sentences, and Dependabot's default ("Bump x from a to b") already fits.
+#
+# Not covered here: security ALERT PRs. `groups:` only governs scheduled
+# version updates; security PRs follow the repo's "Grouped security updates"
+# setting and are not affected by this file.
+#
+# There is no `github-actions` entry because the repo has no workflows yet.
+# Add one (monthly, majors ungrouped) when .github/workflows/ appears.
+
+version: 2
+
+updates:
+  # Root: the Astro site (astro, @astrojs/*, fontsource, typescript).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # Budget: 1 bundle PR + 1 for @astrojs/check + up to 5 ungrouped majors.
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+        # 0.x direct dependencies. Semver treats a 0.x "minor" (0.9 -> 0.10)
+        # as non-breaking, so Dependabot would admit it to this bundle even
+        # though a caret range like ^0.9 won't accept it and it can carry
+        # transitive majors. Keep this list in step with package.json: any
+        # direct dependency whose version starts with 0. belongs here.
+        exclude-patterns:
+          - "@astrojs/check"
+
+  # Worker: workers/contact-form (wrangler, mimetext). Separate lockfile.
+  - package-ecosystem: npm
+    directory: /workers/contact-form
+    schedule:
+      interval: weekly
+      day: monday
+    # Budget: 1 bundle PR + up to 2 ungrouped majors, with headroom.
+    open-pull-requests-limit: 5
+    groups:
+      worker-npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+        # No 0.x direct dependencies today (wrangler 4.x, mimetext 3.x). If one
+        # is added to workers/contact-form/package.json, list it here.

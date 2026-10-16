@@ -104,7 +104,7 @@ export const rates: { title: string; body: string; duration: string; price: stri
         {
           title: 'Couples Counseling',
           body: `Appointments for couples, in person at my ${address.neighborhood} office or online by video. Typically, meetings are weekly or bi-weekly.`,
-          duration: '50 mins',
+          duration: '60 mins',
           price: '$225',
           note: couplesPaymentNote,
         },

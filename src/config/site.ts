@@ -33,11 +33,11 @@ export const ctaLabels = acceptingNewClients
 /**
  * Shows or hides everything couples-counseling across the site: the service
  * cards on the homepage and Services page, the contact form option, the
- * techniques list, and the "couples" wording in rates, bio, and meta
- * descriptions. The copy and photo all stay in the codebase — flip this to
- * true and push to bring it all back.
+ * techniques list, the couples rate and private-pay note on the About page,
+ * and the "couples" wording in the bio and meta descriptions. The copy and
+ * photo all stay in the codebase — flip this and push to hide or show it all.
  */
-export const offerCouplesCounseling = false;
+export const offerCouplesCounseling = true;
 
 export const site = {
   name: 'Brandon Johnson Counseling',
@@ -81,22 +81,36 @@ export const address = {
 /** Remote appointments are offered to clients located anywhere in these states. */
 export const areaServed = ['Oregon', 'Washington'] as const;
 
-const clientele = offerCouplesCounseling ? 'couples and individuals' : 'individuals';
+/**
+ * Couples counseling is not covered by insurance, so it is private pay only.
+ * Shown wherever couples counseling is described or priced.
+ */
+export const couplesPaymentNote =
+  'Couples counseling is not covered by insurance, so I can only accept private (out-of-pocket) payment for it.';
 
-export const rates = [
+/**
+ * In-person and online appointments share one listing: same length, same fee.
+ * `note` renders under the body, for terms that differ from the usual.
+ */
+export const rates: { title: string; body: string; duration: string; price: string; note?: string }[] = [
   {
-    title: '50-minute Online Appointment',
-    body: `Online appointments for ${clientele}. Typically, meetings are weekly or bi-weekly.`,
+    title: 'Individual Appointments',
+    body: `Appointments for individuals, in person at my ${address.neighborhood} office or online by video. Typically, meetings are weekly or bi-weekly.`,
     duration: '50 mins',
     price: '$175',
   },
-  {
-    title: 'In-person Appointments',
-    body: `Office appointments for ${clientele}. Typically, meetings are weekly or bi-weekly.`,
-    duration: '50 mins',
-    price: '$175',
-  },
-] as const;
+  ...(offerCouplesCounseling
+    ? [
+        {
+          title: 'Couples Counseling',
+          body: `Appointments for couples, in person at my ${address.neighborhood} office or online by video. Typically, meetings are weekly or bi-weekly.`,
+          duration: '50 mins',
+          price: '$225',
+          note: couplesPaymentNote,
+        },
+      ]
+    : []),
+];
 
 export const insurers = [
   'Aetna',

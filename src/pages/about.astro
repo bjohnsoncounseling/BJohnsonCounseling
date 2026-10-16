@@ -96,12 +96,15 @@ const office = [
       <ul class="insurers">
         {insurers.map((name) => <li>{name}</li>)}
       </ul>
-      {offerCouplesCounseling && <p class="prose"><strong>{couplesPaymentNote}</strong></p>}
+      {/* Out-of-network reimbursement applies to individual counseling only, so
+          it comes before the couples note and says so — otherwise the two
+          sentences read as contradicting each other. */}
       <p class="prose">
-        Some insurance companies may reimburse you after paying out of pocket for
-        Out-of-Network benefits. Feel free to <a href="/contact">ask for more details</a>{' '}
-        regarding insurance payments.
+        {offerCouplesCounseling ? 'For individual counseling, some' : 'Some'} insurance companies
+        may reimburse you after paying out of pocket for Out-of-Network benefits. Feel free
+        to <a href="/contact">ask for more details</a> regarding insurance payments.
       </p>
+      {offerCouplesCounseling && <p class="prose"><strong>{couplesPaymentNote}</strong></p>}
       <p><Button href="/contact">{ctaLabels.short}</Button></p>
     </div>
   </section>

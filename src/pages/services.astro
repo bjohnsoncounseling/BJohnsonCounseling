@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CTASection from '../components/CTASection.astro';
-import { offerCouplesCounseling } from '../config/site';
+import { couplesPaymentNote, offerCouplesCounseling } from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
 import serviceIndividual from '../assets/images/service-individual.jpg';
@@ -22,6 +22,7 @@ const services = [
     image: serviceCouples,
     alt: 'Two people holding hands across a wooden table, coffee cups beside them.',
     body: 'Couples sometimes get caught in patterns that push them apart from each other when they wish they were closer. Working through it can be painful or scary, and having someone to guide the process of renewing that closeness and trust can make all the difference. We’ll partner to find freedom from cycles of disconnection, connecting and understanding yourselves and each other, and building new patterns together.',
+    note: couplesPaymentNote,
     couples: true,
   },
   {
@@ -54,6 +55,7 @@ const services = [
               <div class="service__text prose">
                 <h3>{service.title}</h3>
                 <p>{service.body}</p>
+                {service.note && <p><strong>{service.note}</strong></p>}
               </div>
             </article>
           ))

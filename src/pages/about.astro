@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CTASection from '../components/CTASection.astro';
 import Button from '../components/Button.astro';
-import { ctaLabels, insurers, rates } from '../config/site';
+import { couplesPaymentNote, ctaLabels, insurers, offerCouplesCounseling, rates } from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
 import officeSpace from '../assets/images/office-counseling-space.jpg';
@@ -74,6 +74,7 @@ const office = [
             <article class="rate">
               <h3>{rate.title}</h3>
               <p>{rate.body}</p>
+              {rate.note && <p class="rate__note">{rate.note}</p>}
               <p class="rate__line">
                 <span>{rate.duration}</span>
                 <span aria-hidden="true">|</span>
@@ -95,6 +96,7 @@ const office = [
       <ul class="insurers">
         {insurers.map((name) => <li>{name}</li>)}
       </ul>
+      {offerCouplesCounseling && <p class="prose"><strong>{couplesPaymentNote}</strong></p>}
       <p class="prose">
         Some insurance companies may reimburse you after paying out of pocket for
         Out-of-Network benefits. Feel free to <a href="/contact">ask for more details</a>{' '}
@@ -142,6 +144,10 @@ const office = [
 
   .rate h3 {
     margin-bottom: var(--space-2xs);
+  }
+
+  .rate__note {
+    font-weight: 600;
   }
 
   .rate__line {

@@ -113,7 +113,7 @@ function buildEmail(env, request, { firstName, lastName, email, phone, service, 
   // mimetext validates known headers: Reply-To must be a Mailbox, not a bare
   // string (a string throws MIMETEXT_INVALID_HEADER_VALUE).
   msg.setHeader("Reply-To", new Mailbox(email));
-  msg.setSubject(`Website enquiry — ${name} (${service})`);
+  msg.setSubject(`Website inquiry — ${name} (${service})`);
   msg.addMessage({
     contentType: "text/plain",
     data: [

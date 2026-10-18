@@ -1,5 +1,9 @@
 ---
-import { contact, serviceOptions, turnstileAction, turnstileSiteKey } from '../config/site';
+import { contact, paymentOptions, serviceOptions, turnstileAction, turnstileSiteKey } from '../config/site';
+
+// Without JS the payment select can't follow the service, so it ships every
+// option once and the enhancement script narrows it.
+const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
 
 /**
  * The Cloudflare function redirects back here with ?submitted=ok|error so the
@@ -33,7 +37,7 @@ const errorReasons: Record<string, string> = {
     with JS submit via fetch and see the result inline, with no full-page
     navigation. The fetch path is also what lets us confirm the Turnstile token
     is present before bothering the server. */}
-<script is:inline define:vars={{ errorReasons }}>
+<script is:inline define:vars={{ errorReasons, paymentOptions }}>
   (() => {
     // Shared success/error UI for both paths — reuses the one status banner.
     const showBanner = (status, reason) => {
@@ -65,6 +69,26 @@ const errorReasons: Record<string, string> = {
 
       const needsTurnstile = !!form.querySelector('.cf-turnstile');
       const label = submit.textContent;
+
+      // The payment select's options depend on the service chosen above it.
+      const service = form.querySelector('#service');
+      const payment = form.querySelector('#payment');
+      const syncPayment = () => {
+        if (!service || !payment) return;
+        const options = paymentOptions[service.value] || [];
+        const previous = payment.value;
+        payment.replaceChildren(
+          new Option(options.length ? 'Select an option' : 'Select a service first', ''),
+          ...options.map((o) => new Option(o, o))
+        );
+        payment.disabled = !options.length;
+        // Keep the earlier pick when it's still on offer after a service change.
+        if (options.includes(previous)) payment.value = previous;
+      };
+      if (service && payment) {
+        service.addEventListener('change', syncPayment);
+        syncPayment();
+      }
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -159,6 +183,14 @@ const errorReasons: Record<string, string> = {
     <select id="service" name="service" required>
       <option value="">Select an option</option>
       {serviceOptions.map((o) => <option value={o}>{o}</option>)}
+    </select>
+  </p>
+
+  <p class="field">
+    <label for="payment">Payment Method <span class="req">(required)</span></label>
+    <select id="payment" name="payment" required>
+      <option value="">Select an option</option>
+      {allPaymentOptions.map((o) => <option value={o}>{o}</option>)}
     </select>
   </p>
 

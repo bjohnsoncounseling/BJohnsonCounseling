@@ -151,6 +151,20 @@ export const serviceOptions = [
 ];
 
 /**
+ * Options in the contact form's payment select, keyed by the service chosen
+ * above it. Insurance applies to individual work only; couples counseling is
+ * private pay (see couplesPaymentNote). Services missing from this map get no
+ * options.
+ */
+const individualPaymentOptions = [...insurers, 'Out of Pocket', 'Out of Network'];
+
+export const paymentOptions: Record<string, string[]> = {
+  'Individual Counseling': individualPaymentOptions,
+  'EMDR/Trauma Therapy': individualPaymentOptions,
+  ...(offerCouplesCounseling ? { 'Couples Counseling': ['Out of Pocket'] } : {}),
+};
+
+/**
  * Public Cloudflare Turnstile site key for the contact form's spam check. This
  * is the PUBLIC key and is safe to commit; the matching SECRET key lives only
  * on the contact-form Worker as the TURNSTILE_SECRET secret. The Worker rejects

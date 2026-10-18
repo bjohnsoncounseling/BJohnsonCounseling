@@ -31,7 +31,7 @@ import { EmailMessage } from "cloudflare:email";
 // would need the nodejs_compat flag for.
 import { createMimeMessage, Mailbox } from "mimetext/browser";
 
-const MAX = { name: 100, email: 200, phone: 40, service: 60, message: 5000 };
+const MAX = { name: 100, email: 200, phone: 40, service: 60, payment: 60, message: 5000 };
 
 // Header-bound fields must never carry CR/LF (header injection) — collapse all
 // whitespace runs. The message body keeps its newlines.
@@ -82,9 +82,10 @@ export default {
     const email = headerSafe(form.get("email"), MAX.email);
     const phone = headerSafe(form.get("phone"), MAX.phone);
     const service = headerSafe(form.get("service"), MAX.service);
+    const payment = headerSafe(form.get("payment"), MAX.payment);
     const message = String(form.get("message") || "").trim().slice(0, MAX.message);
 
-    if (!firstName || !lastName || !email || !service || !message) return respond(400, "missing");
+    if (!firstName || !lastName || !email || !phone || !service || !payment || !message) return respond(400, "missing");
     if (!looksLikeEmail(email)) return respond(400, "email");
 
     const token = String(form.get("cf-turnstile-response") || "");
@@ -94,7 +95,7 @@ export default {
 
     try {
       await env.CONTACT_EMAIL.send(
-        buildEmail(env, request, { firstName, lastName, email, phone, service, message })
+        buildEmail(env, request, { firstName, lastName, email, phone, service, payment, message })
       );
     } catch (err) {
       console.error("send failed:", err);
@@ -105,7 +106,7 @@ export default {
   },
 };
 
-function buildEmail(env, request, { firstName, lastName, email, phone, service, message }) {
+function buildEmail(env, request, { firstName, lastName, email, phone, service, payment, message }) {
   const name = `${firstName} ${lastName}`;
   const msg = createMimeMessage();
   msg.setSender({ name: "BJC contact form", addr: env.FROM_EMAIL });
@@ -121,8 +122,9 @@ function buildEmail(env, request, { firstName, lastName, email, phone, service, 
       "",
       `Name:    ${name}`,
       `Email:   ${email}`,
-      `Phone:   ${phone || "—"}`,
+      `Phone:   ${phone}`,
       `Service: ${service}`,
+      `Payment: ${payment}`,
       "",
       "Message:",
       message,

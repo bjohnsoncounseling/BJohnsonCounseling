@@ -12,6 +12,6 @@
     "mimetext": "^3.0.28"
   },
   "devDependencies": {
-    "wrangler": "^4.149.0"
+    "wrangler": "^4.156.0"
   }
 }

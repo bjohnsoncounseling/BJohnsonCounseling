@@ -115,6 +115,7 @@ export const rates: { title: string; body: string; duration: string; price: stri
 export const insurers = [
   'Aetna',
   'Blue Cross/Blue Shield',
+  'Curative',
   'First Choice Health Network',
   'MODA',
   'Optum',

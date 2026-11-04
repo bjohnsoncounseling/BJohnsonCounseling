@@ -9,6 +9,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "check": "astro check",
+    "test": "node --test \"test/**/*.test.mjs\"",
     "astro": "astro"
   },
   "dependencies": {

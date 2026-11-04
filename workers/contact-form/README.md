@@ -96,8 +96,11 @@ this account on 2026-10-14.
   For local testing use Turnstile's always-passes test secret
   `1x0000000000000000000000000000000AA` and a matching test **site** key
   `1x00000000000000000000AA` in `src/config/site.ts`.
-- `npm run check` bundles the Worker without deploying (no auth needed) — a
-  CI-friendly sanity check.
+- `npm test` runs the Worker's tests inside workerd, with Turnstile stubbed and
+  nothing actually sent (no auth or secrets needed). CI runs these on every PR.
+  They can't prove real delivery: that still takes the live form.
+- `npm run check` bundles the Worker without deploying (no auth needed) — CI
+  runs this too.
 - Dead ends, so nobody re-litigates them: MailChannels-from-Workers shut down in
   Aug 2024; Cloudflare Email Sending (arbitrary recipients) is beta and needs
   Workers Paid — unnecessary here, since the `send_email` binding to a verified

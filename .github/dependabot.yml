@@ -2,8 +2,9 @@
 #
 # Two independent npm trees, each with its own package-lock.json. The worker's
 # lockfile is never touched by a root `npm install`, so it needs its own entry.
+# GitHub Actions versions (.github/workflows/) get a third, monthly stream.
 #
-# Shape of each stream:
+# Shape of each npm stream:
 #   - Weekly, Mondays. Minor + patch bumps are bundled into ONE PR.
 #   - Majors are deliberately NOT grouped: each gets its own PR so it can be
 #     read and tested on its own instead of riding along in a bundle.
@@ -15,9 +16,6 @@
 # Not covered here: security ALERT PRs. `groups:` only governs scheduled
 # version updates; security PRs follow the repo's "Grouped security updates"
 # setting and are not affected by this file.
-#
-# There is no `github-actions` entry because the repo has no workflows yet.
-# Add one (monthly, majors ungrouped) when .github/workflows/ appears.
 
 version: 2
 
@@ -56,5 +54,18 @@ updates:
         update-types:
           - minor
           - patch
-        # No 0.x direct dependencies today (wrangler 4.x, mimetext 3.x). If one
-        # is added to workers/contact-form/package.json, list it here.
+        # No 0.x direct dependencies today (wrangler 4.x, mimetext 3.x, vitest
+        # 5.x, @cloudflare/vitest-plugin 1.x). If one is added to
+        # workers/contact-form/package.json, list it here.
+
+  # Workflows: actions/checkout, actions/setup-node. Majors stay ungrouped.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch

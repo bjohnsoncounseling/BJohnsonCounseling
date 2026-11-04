@@ -1,0 +1,62 @@
+# Runs on each push and PR. Cloudflare Pages already builds the site for every
+# PR, but it never type-checks or touches workers/contact-form, so a dependency
+# bump there could go green without the Worker ever being built or run.
+#
+# No secrets needed: the tests use a hand-built env and stub Turnstile.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Astro requires Node >= 22.12; use 24 (current LTS, matches local dev).
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Build site
+        run: npm run build
+
+      # Internal links, and the contact form against the Worker. Reads dist/.
+      - name: Check the built site
+        run: npm test
+
+  # The Worker is a separate package with its own lockfile, so the root `npm ci`
+  # above never installs it and its tests need their own job.
+  worker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/contact-form
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: workers/contact-form/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Worker tests
+        run: npm test
+
+      # Bundles the Worker the way `npm run deploy` does, without deploying.
+      - name: Check the Worker bundles
+        run: npm run check

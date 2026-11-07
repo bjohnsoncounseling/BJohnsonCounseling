@@ -10,20 +10,30 @@ on:
     branches: [main]
   pull_request:
 
+# A new push to the same branch or PR cancels the run it supersedes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   site:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Astro requires Node >= 22.12; use 24 (current LTS, matches local dev).
+      # Astro requires Node >= 22.12; .nvmrc says 24 (current LTS, matches local dev).
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
         run: npm ci
+
+      # Fails on a known high or critical advisory in the tree. Dependabot
+      # alerts cover the same ground on GitHub; this makes it block the merge.
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
 
       - name: Type-check
         run: npm run check
@@ -47,12 +57,15 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: workers/contact-form/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
 
       - name: Run Worker tests
         run: npm test

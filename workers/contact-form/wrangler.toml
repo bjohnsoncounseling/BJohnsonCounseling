@@ -50,6 +50,12 @@ simple = { limit = 5, period = 60 }
 [observability]
 enabled = true
 
+# Invocation logs record every request's URL and headers (including the
+# visitor's IP) for days. The Worker's own console.warn/error lines are all it
+# needs for debugging, so keep those and drop the per-request records.
+[observability.logs]
+invocation_logs = false
+
 [vars]
 # The sender identity. It doesn't need to exist as a mailbox. Deliverability
 # depends on two DNS records on the zone (see README): the cf2024-1 DKIM key and

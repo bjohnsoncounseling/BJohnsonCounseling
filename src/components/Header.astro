@@ -5,7 +5,7 @@ import { ctaLabels, nav, site } from '../config/site';
 import Button from './Button.astro';
 
 const path = Astro.url.pathname;
-const isCurrent = (href: string) => path === href || path === `${href}/`;
+const isCurrent = (href: string) => path === href;
 ---
 
 <header class="header">
@@ -36,7 +36,7 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
           ))
         }
       </ul>
-      <Button href="/contact" class="nav__cta">{ctaLabels.short}</Button>
+      <Button href="/contact/" class="nav__cta">{ctaLabels.short}</Button>
     </nav>
   </div>
 </header>

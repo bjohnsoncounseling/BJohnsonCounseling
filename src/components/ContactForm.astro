@@ -21,10 +21,10 @@ const errorReasons: Record<string, string> = {
 ---
 
 <div class="status" data-status hidden>
-  <p class="status__ok" data-status-ok hidden>
+  <p class="status__ok" data-status-ok role="status" hidden>
     Thank you &mdash; your message has been sent. I&rsquo;ll be in touch.
   </p>
-  <p class="status__error" data-status-error hidden>
+  <p class="status__error" data-status-error role="alert" hidden>
     <span data-status-message></span>{' '}
     You can also email <a href={`mailto:${contact.email}`}>{contact.email}</a> directly.
   </p>
@@ -287,7 +287,7 @@ const errorReasons: Record<string, string> = {
   }
 
   .req {
-    opacity: 0.65;
+    color: var(--ink-muted);
     font-size: 0.9rem;
   }
 

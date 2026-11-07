@@ -136,19 +136,20 @@ export const memberships = [
 ] as const;
 
 export const nav = [
-  { label: 'About', href: '/about' },
-  { label: 'My Approach', href: '/my-approach' },
-  { label: 'Services', href: '/services' },
-  { label: 'Who I Am', href: '/who-i-am' },
-  { label: 'Privacy and No Surprises', href: '/privacy-and-no-surprises' },
-  { label: 'Contact', href: '/contact' },
+  { label: 'About', href: '/about/' },
+  { label: 'My Approach', href: '/my-approach/' },
+  { label: 'Services', href: '/services/' },
+  { label: 'Who I Am', href: '/who-i-am/' },
+  { label: 'Privacy and No Surprises', href: '/privacy-and-no-surprises/' },
+  { label: 'Contact', href: '/contact/' },
 ] as const;
 
 /** Options in the contact form's "Service Requested" select. */
 export const serviceOptions = [
   'Individual Counseling',
   ...(offerCouplesCounseling ? ['Couples Counseling'] : []),
-  'EMDR/Trauma Therapy',
+  'Trauma Therapy',
+  'Not sure yet',
 ];
 
 /**
@@ -157,12 +158,13 @@ export const serviceOptions = [
  * private pay (see couplesPaymentNote). Services missing from this map get no
  * options.
  */
-const individualPaymentOptions = [...insurers, 'Out of Pocket', 'Out of Network'];
+const individualPaymentOptions = [...insurers, 'Out of Pocket', 'Out of Network', 'Not sure / Other'];
 
 export const paymentOptions: Record<string, string[]> = {
   'Individual Counseling': individualPaymentOptions,
-  'EMDR/Trauma Therapy': individualPaymentOptions,
-  ...(offerCouplesCounseling ? { 'Couples Counseling': ['Out of Pocket'] } : {}),
+  'Trauma Therapy': individualPaymentOptions,
+  'Not sure yet': individualPaymentOptions,
+  ...(offerCouplesCounseling ? { 'Couples Counseling': ['Out of Pocket', 'Not sure / Other'] } : {}),
 };
 
 /**

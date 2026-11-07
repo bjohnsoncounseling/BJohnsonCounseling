@@ -13,3 +13,17 @@
   # else stays locked to 'self'. Tighten inline to hashes later via Astro's CSP
   # support if desired.
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
+
+# The *.pages.dev deployments (production alias and every branch preview) are
+# public copies of the site. Canonical tags already point at the real domain;
+# this keeps them out of search results outright. Placeholder syntax is
+# Cloudflare's: https://developers.cloudflare.com/pages/configuration/headers/
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+# Astro content-hashes everything under /_astro/, so a file never changes at a
+# given URL. Pages' default is a 4-hour max-age; make these immutable.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

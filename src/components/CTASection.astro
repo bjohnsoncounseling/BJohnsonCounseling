@@ -9,7 +9,7 @@ interface Props {
   tone?: 'sand' | 'plain';
 }
 
-const { heading, href = '/contact', label = ctaLabels.long, tone = 'sand' } = Astro.props;
+const { heading, href = '/contact/', label = ctaLabels.long, tone = 'sand' } = Astro.props;
 ---
 
 <section class:list={['section', 'center', tone === 'sand' && 'section--sand']}>

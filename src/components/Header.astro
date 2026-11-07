@@ -212,25 +212,55 @@ const isCurrent = (href: string) => path === href;
 </style>
 
 <script>
+  const header = document.querySelector<HTMLElement>('.header');
   const toggle = document.querySelector<HTMLButtonElement>('.header__toggle');
   const menu = document.querySelector<HTMLElement>('#site-nav');
 
-  if (toggle && menu) {
-    toggle.addEventListener('click', () => {
-      const open = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!open));
-      toggle.setAttribute('aria-label', open ? 'Open menu' : 'Close menu');
-      menu.dataset.open = String(!open);
-    });
+  if (header && toggle && menu) {
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      menu.dataset.open = String(open);
+    };
+
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
 
     // Escape closes the menu and returns focus to the control that opened it.
     document.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
-      if (toggle.getAttribute('aria-expanded') !== 'true') return;
-      toggle.setAttribute('aria-expanded', 'false');
-      toggle.setAttribute('aria-label', 'Open menu');
-      menu.dataset.open = 'false';
+      if (event.key !== 'Escape' || !isOpen()) return;
+      setOpen(false);
       toggle.focus();
+    });
+
+    // Tabbing out of the header (past the CTA, or back before the logo) closes
+    // the menu, so a keyboard user doesn't leave it open over the page. A null
+    // relatedTarget means focus went nowhere in particular (a click on plain
+    // text); the click handler below decides that case.
+    header.addEventListener('focusout', (event) => {
+      const next = event.relatedTarget;
+      if (!isOpen() || !(next instanceof Node) || header.contains(next)) return;
+      setOpen(false);
+    });
+
+    // A click or tap anywhere outside the header closes it.
+    document.addEventListener('click', (event) => {
+      if (!isOpen() || header.contains(event.target as Node)) return;
+      setOpen(false);
+    });
+
+    // Following a link closes it too. Most links load a new page, where the
+    // menu starts closed anyway, but a link to the current page doesn't reload,
+    // and the open menu would otherwise sit over the top of it.
+    menu.addEventListener('click', (event) => {
+      if ((event.target as Element).closest('a')) setOpen(false);
+    });
+
+    // Pages restored from the back/forward cache come back exactly as they were
+    // left, menu included.
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted && isOpen()) setOpen(false);
     });
   }
 </script>

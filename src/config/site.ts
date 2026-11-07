@@ -8,6 +8,11 @@
  * a repeat.
  */
 
+import type { ImageMetadata } from 'astro';
+import serviceIndividual from '../assets/images/service-individual.jpg';
+import serviceTrauma from '../assets/images/service-trauma.jpg';
+import serviceCouples from '../assets/images/service-couples.jpg';
+
 /**
  * Controls the "not accepting new clients" notice on the contact page and the
  * wording of every button that leads there (see `ctaLabels`). Flip this one
@@ -52,9 +57,10 @@ export const practitioner = {
   name: 'Brandon Johnson',
   pronouns: 'He/Him/His',
   degree: 'MA',
+  /** `abbr` is the post-nominal form (LMFT, LMHC) used wherever the title won't fit. */
   licenses: [
-    { title: 'Licensed Marriage & Family Therapist', state: 'OR', number: 'T2389' },
-    { title: 'Licensed Mental Health Counselor', state: 'WA', number: 'LH61514431' },
+    { title: 'Licensed Marriage & Family Therapist', abbr: 'LMFT', state: 'OR', number: 'T2389' },
+    { title: 'Licensed Mental Health Counselor', abbr: 'LMHC', state: 'WA', number: 'LH61514431' },
   ],
 } as const;
 
@@ -144,28 +150,83 @@ export const nav = [
   { label: 'Contact', href: '/contact/' },
 ] as const;
 
-/** Options in the contact form's "Service Requested" select. */
-export const serviceOptions = [
-  'Individual Counseling',
-  ...(offerCouplesCounseling ? ['Couples Counseling'] : []),
-  'Trauma Therapy',
-  'Not sure yet',
+export interface Service {
+  title: string;
+  image: ImageMetadata;
+  /** Written from the photograph itself; the photos are content, not decoration. */
+  alt: string;
+  /** The Services page description. */
+  body: string;
+  /** Rendered in bold under the body, for terms that differ from the usual. */
+  note?: string;
+  /** Private pay only: the form's payment options for it list no insurer. */
+  privatePay?: boolean;
+}
+
+/**
+ * The services offered, in display order. Read by the homepage grid, the
+ * Services page and the contact form's "Service Requested" select, so a title
+ * can't drift between them (it once read "Trauma Counseling", "Trauma Therapy"
+ * and "EMDR/Trauma Therapy" on three surfaces). Couples counseling is listed
+ * only while `offerCouplesCounseling` is on.
+ *
+ * Service imagery is free-licensed (Unsplash / Pexels License, commercial use,
+ * no attribution required). It replaces the Squarespace template stock the old
+ * site used, whose licence did not travel with us.
+ */
+export const services: Service[] = [
+  {
+    title: 'Individual Counseling',
+    image: serviceIndividual,
+    alt: 'A lone figure in a pale poncho walking through a mossy evergreen forest.',
+    body: 'Sometimes individuals reach out wanting to feel better, other times it’s about resolving an issue like challenges in a relationship, and sometimes it’s about seeking to understand yourself and learn how to have a stronger relationship with yourself and your own life. Whether it’s finding purpose and joy in depression, peace in anxiety, resilience from trauma, or pursuing goals or clarity in life, we can do it together.',
+  },
+  ...(offerCouplesCounseling
+    ? [
+        {
+          title: 'Couples Counseling',
+          image: serviceCouples,
+          alt: 'Two people holding hands across a wooden table, coffee cups beside them.',
+          body: 'Couples sometimes get caught in patterns that push them apart from each other when they wish they were closer. Working through it can be painful or scary, and having someone to guide the process of renewing that closeness and trust can make all the difference. We’ll partner to find freedom from cycles of disconnection, connecting and understanding yourselves and each other, and building new patterns together.',
+          note: couplesPaymentNote,
+          privatePay: true,
+        },
+      ]
+    : []),
+  {
+    title: 'Trauma Therapy',
+    image: serviceTrauma,
+    alt: 'A snow-capped peak catching the first warm light of sunrise above an evergreen ridge.',
+    body: "Trauma can leave deep imprints on our lives, often manifesting in ways that disrupt our sense of safety, connection, and self-worth. It can feel overwhelming, but healing is possible. In our work together, we'll create a safe space to explore and understand these experiences, allowing you to reclaim your sense of self and rewrite the narrative of your life. Whether it’s through processing difficult memories, restoring a sense of calm, or finding new pathways to resilience, we'll work together to heal and build a future grounded in strength and hope.",
+  },
 ];
 
 /**
- * Options in the contact form's payment select, keyed by the service chosen
- * above it. Insurance applies to individual work only; couples counseling is
- * private pay (see couplesPaymentNote). Services missing from this map get no
- * options.
+ * srcset widths for the service photos, shared by the homepage grid (cards up
+ * to 20rem wide) and the Services page (up to 26rem): 960 covers both at 2x.
+ * The largest is also the fallback `src`, so the build never emits the
+ * multi-megabyte originals.
  */
-const individualPaymentOptions = [...insurers, 'Out of Pocket', 'Out of Network', 'Not sure / Other'];
+export const serviceImageWidths = [320, 640, 960];
 
-export const paymentOptions: Record<string, string[]> = {
-  'Individual Counseling': individualPaymentOptions,
-  'Trauma Therapy': individualPaymentOptions,
-  'Not sure yet': individualPaymentOptions,
-  ...(offerCouplesCounseling ? { 'Couples Counseling': ['Out of Pocket', 'Not sure / Other'] } : {}),
-};
+/** Options in the contact form's "Service Requested" select. */
+export const serviceOptions = [...services.map((s) => s.title), 'Not sure yet'];
+
+/**
+ * Options in the contact form's payment select, keyed by the service chosen
+ * above it. Insurance applies to individual work only; a private-pay service
+ * (couples counseling, see couplesPaymentNote) lists no insurer. "Not sure
+ * yet" gets the insured list, since it may turn out to be individual work.
+ */
+const insuredPaymentOptions = [...insurers, 'Out of Pocket', 'Out of Network', 'Not sure / Other'];
+const privatePaymentOptions = ['Out of Pocket', 'Not sure / Other'];
+
+export const paymentOptions: Record<string, string[]> = Object.fromEntries(
+  serviceOptions.map((title) => [
+    title,
+    services.find((s) => s.title === title)?.privatePay ? privatePaymentOptions : insuredPaymentOptions,
+  ]),
+);
 
 /**
  * Public Cloudflare Turnstile site key for the contact form's spam check. This

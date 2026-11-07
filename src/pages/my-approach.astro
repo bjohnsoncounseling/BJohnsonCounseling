@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CTASection from '../components/CTASection.astro';
+import { heroImage } from '../lib/hero';
 import { offerCouplesCounseling } from '../config/site';
 
 import mtHood from '../assets/images/mt-hood.jpg';
@@ -42,15 +43,18 @@ const techniques = [
   'Person-Centered Therapy',
   'Systems Theory',
 ];
+
+const hero = await heroImage(mtHood);
 ---
 
 <BaseLayout
   title="My Approach"
   description="An approach rooted in relationships, EFT, ACT, and EMDR — respecting each person’s story and building toward their goals from there."
+  preloadImage={hero}
 >
   <PageHero
     title="Find Someone to Walk Beside You"
-    image={mtHood}
+    hero={hero}
   />
 
   <section class="section">

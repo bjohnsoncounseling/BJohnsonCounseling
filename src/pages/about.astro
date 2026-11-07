@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CTASection from '../components/CTASection.astro';
 import Button from '../components/Button.astro';
+import { heroImage } from '../lib/hero';
 import { couplesPaymentNote, ctaLabels, insurers, offerCouplesCounseling, rates } from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
@@ -28,15 +29,18 @@ const office = [
   { image: officeEntrance, alt: 'The entrance to Brandon’s counseling office.', caption: 'Counseling Entrance' },
   { image: officeBuilding, alt: 'The exterior of Brandon’s office building.', caption: 'Office Building' },
 ];
+
+const hero = await heroImage(heroTree);
 ---
 
 <BaseLayout
   title="About"
   description="Rates, insurance, and approach — Brandon Johnson Counseling, SE Portland. In-network with Aetna, Providence, Regence, and more."
+  preloadImage={hero}
 >
   <PageHero
     title="I want to help you find what you’re looking for"
-    image={heroTree}
+    hero={hero}
   />
 
   <section class="section">
@@ -116,7 +120,7 @@ const office = [
           office.map((photo) => (
             <li>
               <figure class="office__figure">
-                <Image src={photo.image} alt={photo.alt} widths={[520, 1040]} sizes="(max-width: 52rem) 90vw, 32rem" />
+                <Image src={photo.image} alt={photo.alt} widths={[520, 1040]} width={1040} sizes="(max-width: 52rem) 90vw, 32rem" />
                 <figcaption>{photo.caption}</figcaption>
               </figure>
             </li>

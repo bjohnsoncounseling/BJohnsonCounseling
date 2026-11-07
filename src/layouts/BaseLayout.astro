@@ -2,23 +2,52 @@
 import '@fontsource-variable/pontano-sans';
 import '@fontsource-variable/eb-garamond';
 import '../styles/global.css';
+// The Latin subsets are the only font files an English page loads (the rest
+// are gated by unicode-range), and they are preloaded below so the first paint
+// doesn't swap from the fallback face. `?url` yields the same hashed file the
+// package's @font-face rules point at.
+import pontanoSansLatin from '@fontsource-variable/pontano-sans/files/pontano-sans-latin-wght-normal.woff2?url';
+import ebGaramondLatin from '@fontsource-variable/eb-garamond/files/eb-garamond-latin-wght-normal.woff2?url';
 
+import { getImage } from 'astro:assets';
+import type { GetImageResult } from 'astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { address, addressOneLine, areaServed, contact, practitioner, site } from '../config/site';
+import { address, addressOneLine, areaServed, contact, practitioner, rates, site } from '../config/site';
+import ogSource from '../assets/images/hero-tree.jpg';
 
 interface Props {
   title: string;
   description?: string;
   /** Set on the homepage only, so the site name isn't duplicated in the tab. */
   bareTitle?: boolean;
+  /**
+   * The page's hero photo, from `heroImage()` in src/lib/hero.ts. It is the
+   * largest contentful paint wherever it appears, so it is preloaded from
+   * `<head>` instead of waiting for the parser to reach the `<img>`.
+   */
+  preloadImage?: GetImageResult;
 }
 
-const { title, description = site.description, bareTitle = false } = Astro.props;
+const { title, description = site.description, bareTitle = false, preloadImage } = Astro.props;
 
 const pageTitle = bareTitle ? title : `${title} — ${site.name}`;
 const canonical = new URL(Astro.url.pathname, site.url).href;
-const ogImage = new URL('/og-image.jpg', site.url).href;
+
+/**
+ * The link-preview image: today the same tree as the hero. To ship a branded
+ * card (1200 x 630 with the mountain mark and the practice name) point the
+ * `ogSource` import at the new file; its dimensions are read from the file,
+ * so the og:image:width/height tags and the alt below are all that change.
+ */
+const og = await getImage({ src: ogSource, format: 'jpg', width: ogSource.width });
+const ogImage = new URL(og.src, site.url).href;
+const ogImageAlt = 'A broad oak tree in full leaf, backlit by low sun over a park lawn.';
+
+/** Numeric dollar amount of a `rates` price such as "$175". */
+const dollars = (price: string) => Number(price.replace(/[^\d.]/g, ''));
+const prices = rates.map((r) => dollars(r.price));
+const priceRange = prices.length > 1 ? `$${Math.min(...prices)}-$${Math.max(...prices)}` : rates[0].price;
 
 /**
  * Structured data, built from src/config/site.ts so it cannot drift from the
@@ -34,12 +63,12 @@ const jsonLd = {
       '@id': `${site.url}/#practice`,
       name: site.name,
       url: site.url,
-      image: `${site.url}/og-image.jpg`,
+      image: ogImage,
       logo: `${site.url}/icon-512.png`,
       email: contact.email,
       telephone: contact.phone,
       faxNumber: contact.fax,
-      priceRange: '$$',
+      priceRange,
       address: {
         '@type': 'PostalAddress',
         streetAddress: address.street,
@@ -56,13 +85,24 @@ const jsonLd = {
       hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressOneLine)}`,
       areaServed: areaServed.map((name) => ({ '@type': 'State', name })),
       founder: { '@id': `${site.url}/#brandon` },
+      makesOffer: rates.map((r) => ({
+        '@type': 'Offer',
+        price: dollars(r.price),
+        priceCurrency: 'USD',
+        itemOffered: {
+          '@type': 'Service',
+          name: r.title,
+          description: r.body,
+          provider: { '@id': `${site.url}/#practice` },
+        },
+      })),
     },
     {
       '@type': 'Person',
       '@id': `${site.url}/#brandon`,
       name: practitioner.name,
       honorificSuffix: practitioner.degree,
-      jobTitle: 'Licensed Marriage & Family Therapist',
+      jobTitle: practitioner.licenses.map((l) => l.title),
       email: contact.email,
       telephone: contact.phone,
       worksFor: { '@id': `${site.url}/#practice` },
@@ -74,6 +114,11 @@ const jsonLd = {
     },
   ],
 };
+
+// `set:html` doesn't escape, and "</script>" inside a JSON string would end the
+// block early. Everything here is static config today; this keeps it safe if a
+// value ever comes from somewhere else.
+const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -84,6 +129,22 @@ const jsonLd = {
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+
+    {
+      preloadImage && (
+        <link
+          rel="preload"
+          as="image"
+          href={preloadImage.src}
+          imagesrcset={preloadImage.srcSet.attribute}
+          imagesizes={preloadImage.attributes.sizes}
+          fetchpriority="high"
+        />
+      )
+    }
+    <link rel="preload" as="font" type="font/woff2" href={pontanoSansLatin} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={ebGaramondLatin} crossorigin />
+
     {/* Favicon set generated from Brandon's 751px mountain mark (Browser Icon.png). */}
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
@@ -92,17 +153,22 @@ const jsonLd = {
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content={String(ogSource.width)} />
+    <meta property="og:image:height" content={String(ogSource.height)} />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+    <script type="application/ld+json" set:html={jsonLdHtml} is:inline />
   </head>
 
   <body>

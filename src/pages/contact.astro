@@ -27,7 +27,7 @@ import { acceptingNewClients, address, contact, practitioner, unavailableNotice 
             {practitioner.pronouns}<br />
             {
               practitioner.licenses.map((l) => (
-                <>{l.state} {l.title} ({l.title.includes('Marriage') ? 'LMFT' : 'LMHC'})<br /></>
+                <>{l.state} {l.title} ({l.abbr})<br /></>
               ))
             }
           </p>

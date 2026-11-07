@@ -2,14 +2,22 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
-import { addressOneLine, address, areaServed, ctaLabels, memberships, offerCouplesCounseling, practitioner } from '../config/site';
+import { heroImage } from '../lib/hero';
+import {
+  addressOneLine,
+  address,
+  areaServed,
+  ctaLabels,
+  memberships,
+  offerCouplesCounseling,
+  practitioner,
+  serviceImageWidths,
+  services,
+} from '../config/site';
 
 import heroTree from '../assets/images/hero-tree.jpg';
 import mtHood from '../assets/images/mt-hood.jpg';
 import headshot from '../assets/images/headshot-brandon.jpeg';
-import serviceIndividual from '../assets/images/service-individual.jpg';
-import serviceTrauma from '../assets/images/service-trauma.jpg';
-import serviceCouples from '../assets/images/service-couples.jpg';
 import badgeTherapyDen from '../assets/images/badge-therapyden.png';
 import badgePtc from '../assets/images/badge-ptc.png';
 import badgeMft from '../assets/images/badge-mft.png';
@@ -20,43 +28,12 @@ const badges = [
   { image: badgeMft, alt: 'AAMFT Clinical Fellow', href: 'https://www.aamft.org/' },
 ];
 
-/**
- * Service imagery is free-licensed (Unsplash / Pexels License, commercial use,
- * no attribution required). It replaces the Squarespace template stock the old
- * site used, whose licence did not travel with us. Alt text is written from the
- * photographs themselves.
- */
-const services = [
-  {
-    title: 'Individual Counseling',
-    image: serviceIndividual,
-    alt: 'A lone figure in a pale poncho walking through a mossy evergreen forest.',
-  },
-  {
-    title: 'Trauma Therapy',
-    image: serviceTrauma,
-    alt: 'A snow-capped peak catching the first warm light of sunrise above an evergreen ridge.',
-  },
-  {
-    title: 'Couples Counseling',
-    image: serviceCouples,
-    alt: 'Two people holding hands across a wooden table, coffee cups beside them.',
-    couples: true,
-  },
-].filter((service) => offerCouplesCounseling || !service.couples);
+const hero = await heroImage(heroTree);
 ---
 
-<BaseLayout title="Brandon Johnson Counseling | Therapy in SE Portland" bareTitle>
+<BaseLayout title="Brandon Johnson Counseling | Therapy in SE Portland" bareTitle preloadImage={hero}>
   <section class="hero">
-    <Image
-      src={heroTree}
-      alt=""
-      class="hero__image"
-      widths={[600, 1000]}
-      sizes="100vw"
-      loading="eager"
-      fetchpriority="high"
-    />
+    <img src={hero.src} srcset={hero.srcSet.attribute} {...hero.attributes} alt="" class="hero__image" />
     <div class="hero__body container">
       <h1>Welcome</h1>
       <p class="hero__lede measure">
@@ -81,7 +58,7 @@ const services = [
       </div>
 
       <figure class="intro__figure">
-        <Image src={mtHood} alt="Mount Hood at sunset, its snow-covered peak glowing above a dark ridge of evergreens." widths={[582, 1164]} sizes="(max-width: 60rem) 90vw, 36rem" />
+        <Image src={mtHood} alt="Mount Hood at sunset, its snow-covered peak glowing above a dark ridge of evergreens." widths={[582, 1164]} width={1164} sizes="(max-width: 60rem) 90vw, 36rem" />
         {/* CC BY 2.0 requires credit to the author with a link to the source and
             the licence. The old site credited "Zach Daschner" — a misspelling —
             with no link to either. */}
@@ -135,7 +112,7 @@ const services = [
         {
           services.map((service) => (
             <li class="services__item">
-              <Image src={service.image} alt={service.alt} widths={[300, 600, 1100]} sizes={`(max-width: 48rem) 80vw, ${services.length < 3 ? '34rem' : '20rem'}`} />
+              <Image src={service.image} alt={service.alt} widths={serviceImageWidths} width={serviceImageWidths.at(-1)} sizes={`(max-width: 48rem) 80vw, ${services.length < 3 ? '34rem' : '20rem'}`} />
               <h3>{service.title}</h3>
             </li>
           ))
@@ -147,13 +124,13 @@ const services = [
 
   <section class="section">
     <div class="container who">
-      <Image src={headshot} alt={`${practitioner.name}, standing outdoors in front of a flowering tree.`} class="who__photo" widths={[476, 952]} sizes="(max-width: 60rem) 70vw, 30rem" />
+      <Image src={headshot} alt={`${practitioner.name}, standing outdoors in front of a flowering tree.`} class="who__photo" widths={[476, 952]} width={952} sizes="(max-width: 60rem) 70vw, 30rem" />
       <div class="who__text prose">
         <h2>Who I am</h2>
         <p class="who__credentials">
           <strong>{practitioner.name}</strong> {practitioner.pronouns}, {practitioner.degree}<br />
           {practitioner.licenses.map((l) => (
-            <>{l.title.includes('Marriage') ? 'LMFT' : 'LMHC'} ({l.state}: {l.number})<br /></>
+            <>{l.abbr} ({l.state}: {l.number})<br /></>
           ))}
         </p>
         <p>
@@ -194,7 +171,7 @@ const services = [
           badges.map((b) => (
             <li>
               <a href={b.href} target="_blank" rel="noopener noreferrer">
-                <Image src={b.image} alt={b.alt} widths={[160, 320]} sizes="10rem" />
+                <Image src={b.image} alt={b.alt} widths={[160, 320]} width={Math.min(320, b.image.width)} sizes="10rem" />
               </a>
             </li>
           ))

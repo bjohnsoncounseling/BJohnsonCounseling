@@ -1,19 +1,22 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import type { GetImageResult } from 'astro';
 
 interface Props {
   /** The page's single h1. */
   title: string;
-  /** Decorative: the h1 carries the meaning, so the image is announced as nothing. */
-  image: ImageMetadata;
+  /**
+   * From `heroImage()` in src/lib/hero.ts. The page passes the same result to
+   * BaseLayout's `preloadImage`, so the preload and the img never disagree.
+   * Decorative: the h1 carries the meaning, so the image is announced as nothing.
+   */
+  hero: GetImageResult;
 }
 
-const { title, image } = Astro.props;
+const { title, hero } = Astro.props;
 ---
 
 <section class="page-hero">
-  <Image src={image} alt="" class="page-hero__image" widths={[900, 1600]} sizes="100vw" loading="eager" fetchpriority="high" />
+  <img src={hero.src} srcset={hero.srcSet.attribute} {...hero.attributes} alt="" class="page-hero__image" />
   <div class="page-hero__body container">
     <h1 class="measure">{title}</h1>
   </div>

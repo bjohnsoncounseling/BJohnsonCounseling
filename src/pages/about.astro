@@ -38,33 +38,30 @@ const hero = await heroImage(heroTree);
   description="Rates, insurance, and approach — Brandon Johnson Counseling, SE Portland. In-network with Aetna, Providence, Regence, and more."
   preloadImage={hero}
 >
-  <PageHero
-    title="I want to help you find what you’re looking for"
-    hero={hero}
-  />
+  <PageHero title="I want to help you find what you’re looking for" hero={hero} />
 
   <section class="section">
     <div class="container measure prose">
       <h2>Growing in relationship</h2>
       <p>
-        I believe we are all figuring out how to be in relationship with ourselves and each
-        other, and inviting another person in who is dedicated to helping you understand your
-        patterns and shaping new ones can make all the difference.
+        I believe we are all figuring out how to be in relationship with ourselves and each other, and inviting another
+        person in who is dedicated to helping you understand your patterns and shaping new ones can make all the
+        difference.
       </p>
 
       <h2>My approach</h2>
       <p>
         I specialize in relationships, complex trauma, dissociation, anxiety, and depression. I believe that joining
-        together to build trust is the basis for our work together. The approach I use for
-        working with relationships is Emotionally Focused Therapy (EFT), building on the idea
-        of security and trust in relationships as the foundation for connection,
-        communication, and collaboration. For individuals, I lean on much of the same basic
-        concepts, and I also draw on Acceptance and Commitment Therapy (ACT), which builds on
-        acceptance, present-moment awareness, a solid sense of self, flexibility, values, and
-        intentional action. For working with trauma, I use Eye-Movement Desensitization &amp;
-        Reprocessing Therapy (EMDR) and Emotion-Focused Trauma Therapy (EFTT).
+        together to build trust is the basis for our work together. The approach I use for working with relationships is
+        Emotionally Focused Therapy (EFT), building on the idea of security and trust in relationships as the foundation
+        for connection, communication, and collaboration. For individuals, I lean on much of the same basic concepts,
+        and I also draw on Acceptance and Commitment Therapy (ACT), which builds on acceptance, present-moment
+        awareness, a solid sense of self, flexibility, values, and intentional action. For working with trauma, I use
+        Eye-Movement Desensitization &amp; Reprocessing Therapy (EMDR) and Emotion-Focused Trauma Therapy (EFTT).
       </p>
-      <p><Button href="/my-approach/">How I work</Button></p>
+      <p>
+        <Button href="/my-approach/">How I work</Button>
+      </p>
     </div>
   </section>
 
@@ -72,22 +69,20 @@ const hero = await heroImage(heroTree);
     <div class="container">
       <h2>Rates</h2>
       <div class="rates">
-        {
-          rates.map((rate) => (
-            <article class="rate">
-              <h3>{rate.title}</h3>
-              <p>{rate.body}</p>
-              {rate.note && <p class="rate__note">{rate.note}</p>}
-              <p class="rate__line">
-                <span>{rate.duration}</span>
-                <span aria-hidden="true">|</span>
-                <strong>{rate.price}</strong>
-                <span aria-hidden="true">|</span>
-                <a href="/contact/">{ctaLabels.short}</a>
-              </p>
-            </article>
-          ))
-        }
+        {rates.map((rate) => (
+          <article class="rate">
+            <h3>{rate.title}</h3>
+            <p>{rate.body}</p>
+            {rate.note && <p class="rate__note">{rate.note}</p>}
+            <p class="rate__line">
+              <span>{rate.duration}</span>
+              <span aria-hidden="true">|</span>
+              <strong>{rate.price}</strong>
+              <span aria-hidden="true">|</span>
+              <a href="/contact/">{ctaLabels.short}</a>
+            </p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -97,18 +92,26 @@ const hero = await heroImage(heroTree);
       <h2>Insurance</h2>
       <p>I’m In-Network with the following insurance companies:</p>
       <ul class="insurers">
-        {insurers.map((name) => <li>{name}</li>)}
+        {insurers.map((name) => (
+          <li>{name}</li>
+        ))}
       </ul>
       {/* Out-of-network reimbursement applies to individual counseling only, so
           it comes before the couples note and says so — otherwise the two
           sentences read as contradicting each other. */}
       <p class="prose">
-        {offerCouplesCounseling ? 'For individual counseling, some' : 'Some'} insurance companies
-        may reimburse you after paying out of pocket for Out-of-Network benefits. Feel free
-        to <a href="/contact/">ask for more details</a> regarding insurance payments.
+        {offerCouplesCounseling ? 'For individual counseling, some' : 'Some'} insurance companies may reimburse you
+        after paying out of pocket for Out-of-Network benefits. Feel free to{' '}
+        <a href="/contact/">ask for more details</a> regarding insurance payments.
       </p>
-      {offerCouplesCounseling && <p class="prose"><strong>{couplesPaymentNote}</strong></p>}
-      <p><Button href="/contact/">{ctaLabels.short}</Button></p>
+      {offerCouplesCounseling && (
+        <p class="prose">
+          <strong>{couplesPaymentNote}</strong>
+        </p>
+      )}
+      <p>
+        <Button href="/contact/">{ctaLabels.short}</Button>
+      </p>
     </div>
   </section>
 
@@ -116,16 +119,20 @@ const hero = await heroImage(heroTree);
     <div class="container">
       <h2 class="center">The space</h2>
       <ul class="office">
-        {
-          office.map((photo) => (
-            <li>
-              <figure class="office__figure">
-                <Image src={photo.image} alt={photo.alt} widths={[520, 1040]} width={1040} sizes="(max-width: 52rem) 90vw, 32rem" />
-                <figcaption>{photo.caption}</figcaption>
-              </figure>
-            </li>
-          ))
-        }
+        {office.map((photo) => (
+          <li>
+            <figure class="office__figure">
+              <Image
+                src={photo.image}
+                alt={photo.alt}
+                widths={[520, 1040]}
+                width={1040}
+                sizes="(max-width: 52rem) 90vw, 32rem"
+              />
+              <figcaption>{photo.caption}</figcaption>
+            </figure>
+          </li>
+        ))}
       </ul>
     </div>
   </section>

@@ -37,8 +37,8 @@ const hero = await heroImage(heroTree);
     <div class="hero__body container">
       <h1>Welcome</h1>
       <p class="hero__lede measure">
-        I invite you to explore how you and I can partner to shine a light on the path
-        forward to healing, growth, and peace.
+        I invite you to explore how you and I can partner to shine a light on the path forward to healing, growth, and
+        peace.
       </p>
     </div>
   </section>
@@ -47,27 +47,38 @@ const hero = await heroImage(heroTree);
     <div class="container intro">
       <div class="intro__text prose">
         <p>
-          My approach starts with respecting each person&rsquo;s story and perspective and
-          builds toward goals from there. Whether in relationship with yourself, your
-          partner, your children, or others in your life, sometimes you get stuck in loops
-          and can&rsquo;t seem to break free. Working free of those cycles can be hard to do on
-          your own, and my job is to partner with you in untangling the knots, making sense
-          of it all, and helping you explore the path to where you&rsquo;d rather be.
+          My approach starts with respecting each person&rsquo;s story and perspective and builds toward goals from
+          there. Whether in relationship with yourself, your partner, your children, or others in your life, sometimes
+          you get stuck in loops and can&rsquo;t seem to break free. Working free of those cycles can be hard to do on
+          your own, and my job is to partner with you in untangling the knots, making sense of it all, and helping you
+          explore the path to where you&rsquo;d rather be.
         </p>
         <Button href="/about/">Rates and insurance</Button>
       </div>
 
       <figure class="intro__figure">
-        <Image src={mtHood} alt="Mount Hood at sunset, its snow-covered peak glowing above a dark ridge of evergreens." widths={[582, 1164]} width={1164} sizes="(max-width: 60rem) 90vw, 36rem" />
+        <Image
+          src={mtHood}
+          alt="Mount Hood at sunset, its snow-covered peak glowing above a dark ridge of evergreens."
+          widths={[582, 1164]}
+          width={1164}
+          sizes="(max-width: 60rem) 90vw, 36rem"
+        />
         {/* CC BY 2.0 requires credit to the author with a link to the source and
             the licence. The old site credited "Zach Daschner" — a misspelling —
             with no link to either. */}
         <figcaption>
-          <a href="https://www.flickr.com/photos/zachd1_618/8081466807" target="_blank" rel="noopener noreferrer">Mt. Hood</a>{' '}
+          <a href="https://www.flickr.com/photos/zachd1_618/8081466807" target="_blank" rel="noopener noreferrer">
+            Mt. Hood
+          </a>{' '}
           by{' '}
-          <a href="https://www.flickr.com/photos/zachd1_618/" target="_blank" rel="noopener noreferrer">Zach Dischner</a>
+          <a href="https://www.flickr.com/photos/zachd1_618/" target="_blank" rel="noopener noreferrer">
+            Zach Dischner
+          </a>
           {', '}
-          <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>
+          <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">
+            CC BY 2.0
+          </a>
         </figcaption>
       </figure>
     </div>
@@ -77,9 +88,8 @@ const hero = await heroImage(heroTree);
     <div class="container center measure-center">
       <h2>Providing you with a space for peace and transformation</h2>
       <p class="measure-center-p">
-        I have experience responding to each situation&rsquo;s unique needs and guiding
-        participants toward experiencing the changes they&rsquo;re looking for and the peace
-        they need.
+        I have experience responding to each situation&rsquo;s unique needs and guiding participants toward experiencing
+        the changes they&rsquo;re looking for and the peace they need.
       </p>
       <Button href="/my-approach/">My Approach</Button>
     </div>
@@ -89,8 +99,8 @@ const hero = await heroImage(heroTree);
     <div class="container measure">
       <h2>Location</h2>
       <p>
-        I offer in person appointments at my office in {address.neighborhood} ({address.street}).
-        I also offer remote appointments by video call for clients located anywhere in {areaServed.join(' or ')}.
+        I offer in person appointments at my office in {address.neighborhood} ({address.street}). I also offer remote
+        appointments by video call for clients located anywhere in {areaServed.join(' or ')}.
       </p>
       <p>
         <a
@@ -109,37 +119,54 @@ const hero = await heroImage(heroTree);
     <div class="container">
       <h2 class="center">My services</h2>
       <ul class="services">
-        {
-          services.map((service) => (
-            <li class="services__item">
-              <Image src={service.image} alt={service.alt} widths={serviceImageWidths} width={serviceImageWidths.at(-1)} sizes={`(max-width: 48rem) 80vw, ${services.length < 3 ? '34rem' : '20rem'}`} />
-              <h3>{service.title}</h3>
-            </li>
-          ))
-        }
+        {services.map((service) => (
+          <li class="services__item">
+            <Image
+              src={service.image}
+              alt={service.alt}
+              widths={serviceImageWidths}
+              width={serviceImageWidths.at(-1)}
+              sizes={`(max-width: 48rem) 80vw, ${services.length < 3 ? '34rem' : '20rem'}`}
+            />
+            <h3>{service.title}</h3>
+          </li>
+        ))}
       </ul>
-      <p class="center"><Button href="/services/" variant="outline">See services</Button></p>
+      <p class="center">
+        <Button href="/services/" variant="outline">
+          See services
+        </Button>
+      </p>
     </div>
   </section>
 
   <section class="section">
     <div class="container who">
-      <Image src={headshot} alt={`${practitioner.name}, standing outdoors in front of a flowering tree.`} class="who__photo" widths={[476, 952]} width={952} sizes="(max-width: 60rem) 70vw, 30rem" />
+      <Image
+        src={headshot}
+        alt={`${practitioner.name}, standing outdoors in front of a flowering tree.`}
+        class="who__photo"
+        widths={[476, 952]}
+        width={952}
+        sizes="(max-width: 60rem) 70vw, 30rem"
+      />
       <div class="who__text prose">
         <h2>Who I am</h2>
         <p class="who__credentials">
-          <strong>{practitioner.name}</strong> {practitioner.pronouns}, {practitioner.degree}<br />
+          <strong>{practitioner.name}</strong> {practitioner.pronouns}, {practitioner.degree}
+          <br />
           {practitioner.licenses.map((l) => (
-            <>{l.abbr} ({l.state}: {l.number})<br /></>
+            <>
+              {l.abbr} ({l.state}: {l.number})<br />
+            </>
           ))}
         </p>
         <p>
-          I&rsquo;m a Licensed Marriage and Family Therapist (LMFT) with the state of Oregon and
-          a Licensed Mental Health Counselor (LMHC) with the state of Washington. I hold a
-          Master of Arts in Marriage, Couple and Family Counseling. I specialize in working
-          with individuals{offerCouplesCounseling ? ', couples,' : ''} and relationships around conflict, anxiety, depression,
-          and relationally based trauma (including C-PTSD), dissociation (including OSDD and
-          DID), history of abuse, religious trauma and faith deconstruction.
+          I&rsquo;m a Licensed Marriage and Family Therapist (LMFT) with the state of Oregon and a Licensed Mental
+          Health Counselor (LMHC) with the state of Washington. I hold a Master of Arts in Marriage, Couple and Family
+          Counseling. I specialize in working with individuals{offerCouplesCounseling ? ', couples,' : ''} and
+          relationships around conflict, anxiety, depression, and relationally based trauma (including C-PTSD),
+          dissociation (including OSDD and DID), history of abuse, religious trauma and faith deconstruction.
         </p>
         <Button href="/who-i-am/">More about Brandon</Button>
       </div>
@@ -157,25 +184,23 @@ const hero = await heroImage(heroTree);
     <div class="container">
       <h2 class="center">Memberships and Affiliations</h2>
       <ul class="memberships">
-        {
-          memberships.map((m) => (
-            <li>
-              <a href={m.url} target="_blank" rel="noopener noreferrer">{m.name}</a>
-            </li>
-          ))
-        }
+        {memberships.map((m) => (
+          <li>
+            <a href={m.url} target="_blank" rel="noopener noreferrer">
+              {m.name}
+            </a>
+          </li>
+        ))}
       </ul>
 
       <ul class="badges">
-        {
-          badges.map((b) => (
-            <li>
-              <a href={b.href} target="_blank" rel="noopener noreferrer">
-                <Image src={b.image} alt={b.alt} widths={[160, 320]} width={Math.min(320, b.image.width)} sizes="10rem" />
-              </a>
-            </li>
-          ))
-        }
+        {badges.map((b) => (
+          <li>
+            <a href={b.href} target="_blank" rel="noopener noreferrer">
+              <Image src={b.image} alt={b.alt} widths={[160, 320]} width={Math.min(320, b.image.width)} sizes="10rem" />
+            </a>
+          </li>
+        ))}
       </ul>
     </div>
   </section>
@@ -203,7 +228,12 @@ const hero = await heroImage(heroTree);
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(31, 38, 37, 0.72) 0%, rgba(31, 38, 37, 0.28) 45%, rgba(31, 38, 37, 0.08) 100%);
+    background: linear-gradient(
+      to top,
+      rgba(31, 38, 37, 0.72) 0%,
+      rgba(31, 38, 37, 0.28) 45%,
+      rgba(31, 38, 37, 0.08) 100%
+    );
     z-index: -1;
   }
 

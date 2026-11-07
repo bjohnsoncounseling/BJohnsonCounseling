@@ -30,7 +30,7 @@ cd workers/contact-form && npm test && npm run check # Worker, inside workerd
 - The contact form and its Worker share `shared/contact-contract.js`. Change a
   field name, a length limit or an error code there, not in either consumer.
 - A Worker change is not live until `wrangler deploy` runs (or the `Deploy
-  Worker` workflow, once its secret exists). Say so in the PR.
+Worker` workflow, once its secret exists). Say so in the PR.
 - Internal links end in a slash (`/about/`).
 - `<Image>` uses pass both `widths` and a `width` equal to the largest
   candidate, or the build emits the full-size original.

@@ -130,18 +130,16 @@ const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
-    {
-      preloadImage && (
-        <link
-          rel="preload"
-          as="image"
-          href={preloadImage.src}
-          imagesrcset={preloadImage.srcSet.attribute}
-          imagesizes={preloadImage.attributes.sizes}
-          fetchpriority="high"
-        />
-      )
-    }
+    {preloadImage && (
+      <link
+        rel="preload"
+        as="image"
+        href={preloadImage.src}
+        imagesrcset={preloadImage.srcSet.attribute}
+        imagesizes={preloadImage.attributes.sizes}
+        fetchpriority="high"
+      />
+    )}
     <link rel="preload" as="font" type="font/woff2" href={pontanoSansLatin} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={ebGaramondLatin} crossorigin />
 
@@ -172,7 +170,9 @@ const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
   </head>
 
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
     <Header />
     <main id="main">
       <slot />

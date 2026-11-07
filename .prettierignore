@@ -1,0 +1,11 @@
+# Build output, generated files and tool state.
+dist/
+.astro/
+.wrangler/
+.wrangler-check/
+.lighthouseci/
+package-lock.json
+.claude/
+
+# The audit report is a dated record of what was found; its tables stay as written.
+docs/audit-2026-11-07.md

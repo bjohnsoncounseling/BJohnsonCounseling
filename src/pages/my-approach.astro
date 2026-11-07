@@ -55,32 +55,26 @@ const hero = await heroImage(mtHood);
   description="An approach rooted in relationships, EFT, ACT, and EMDR — respecting each person’s story and building toward their goals from there."
   preloadImage={hero}
 >
-  <PageHero
-    title="Find Someone to Walk Beside You"
-    hero={hero}
-  />
+  <PageHero title="Find Someone to Walk Beside You" hero={hero} />
 
   <section class="section">
     <div class="container measure prose">
       <h2>My Approach</h2>
       <p>
-        My approach starts with respecting each person’s story and perspective and builds
-        toward goals from there. Whether in relationship with yourself, your partner, or
-        others in your life, sometimes you get stuck in loops and can&apos;t seem to break free.
-        I’m here to explore with you in understanding where these cycles have come from,
-        making sense of yourself and the world around you, and learning where to go from
-        there. Freedom from those cycles can be hard to find on your own, and together we can
-        untangle and make sense of where you are and explore the path to where you’d rather be.
+        My approach starts with respecting each person’s story and perspective and builds toward goals from there.
+        Whether in relationship with yourself, your partner, or others in your life, sometimes you get stuck in loops
+        and can&apos;t seem to break free. I’m here to explore with you in understanding where these cycles have come
+        from, making sense of yourself and the world around you, and learning where to go from there. Freedom from those
+        cycles can be hard to find on your own, and together we can untangle and make sense of where you are and explore
+        the path to where you’d rather be.
       </p>
       <p>
-        I use a variety of methods for helping people reach for meaning, connection, and the
-        life they’re hoping for. My approach is based in relationships, learning to recognize
-        patterns and build new strategies for meeting needs, developing a story that can help
-        map out a new direction, facing and accepting the difficult aspects of life,
-        clarifying values, and understanding how bodies and brains impact how people function.
-        I partner with people to incorporate their values, beliefs, backgrounds, needs, and
-        expertise in their own lives into the process of growth, change, and connection that
-        promote resilience, interdependence, and freedom in life and relationships.
+        I use a variety of methods for helping people reach for meaning, connection, and the life they’re hoping for. My
+        approach is based in relationships, learning to recognize patterns and build new strategies for meeting needs,
+        developing a story that can help map out a new direction, facing and accepting the difficult aspects of life,
+        clarifying values, and understanding how bodies and brains impact how people function. I partner with people to
+        incorporate their values, beliefs, backgrounds, needs, and expertise in their own lives into the process of
+        growth, change, and connection that promote resilience, interdependence, and freedom in life and relationships.
       </p>
     </div>
   </section>
@@ -89,7 +83,9 @@ const hero = await heroImage(mtHood);
     <div class="container">
       <h2>Issues I Treat</h2>
       <ul class="tags">
-        {issues.map((i) => <li>{i}</li>)}
+        {issues.map((i) => (
+          <li>{i}</li>
+        ))}
       </ul>
     </div>
   </section>
@@ -98,7 +94,9 @@ const hero = await heroImage(mtHood);
     <div class="container">
       <h2>Techniques I Use</h2>
       <ul class="tags">
-        {techniques.map((t) => <li>{t}</li>)}
+        {techniques.map((t) => (
+          <li>{t}</li>
+        ))}
       </ul>
     </div>
   </section>

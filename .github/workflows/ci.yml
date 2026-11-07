@@ -35,6 +35,10 @@ jobs:
       - name: Audit dependencies
         run: npm audit --audit-level=high
 
+      # Prettier, with the settings in .prettierrc. `npm run format` fixes it.
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Type-check
         run: npm run check
 
@@ -73,3 +77,40 @@ jobs:
       # Bundles the Worker the way `npm run deploy` does, without deploying.
       - name: Check the Worker bundles
         run: npm run check
+
+  # Lighthouse (performance, accessibility via axe, best practices, SEO) against
+  # the built site, with the budgets in lighthouserc.json. Advisory only: it is
+  # not a required check, and a failed assertion annotates the run rather than
+  # blocking the merge. The HTML reports are attached to the run as an artifact.
+  #
+  # Lighthouse CI is run through npx rather than installed as a devDependency
+  # because its browser-automation dependencies carry open high-severity
+  # advisories that the audit step above would (rightly) refuse. Nothing here
+  # ships to the site.
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Run Lighthouse CI
+        continue-on-error: true
+        run: npx --yes @lhci/cli@0.16.0 autorun
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/reports
+          if-no-files-found: ignore

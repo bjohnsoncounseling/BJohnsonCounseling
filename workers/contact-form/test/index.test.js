@@ -10,6 +10,7 @@
 // Turnstile's siteverify is the only outbound fetch; it is stubbed per test.
 import { describe, it, expect, vi, afterEach } from "vitest";
 import worker from "../src/index.js";
+import { FIELDS, MAX, MAX_BODY_BYTES } from "../../../shared/contact-contract.js";
 
 const BASE = "https://bjohnsoncounseling.com";
 const PATH = "/api/contact";
@@ -17,15 +18,18 @@ const IP = "203.0.113.7";
 
 /** A submission that passes every check, so each test can vary one field. */
 const VALID = {
-  firstName: "Ada",
-  lastName: "Lovelace",
-  email: "ada@example.com",
-  phone: "(503) 555-0100",
-  service: "Individual Counseling",
-  payment: "Out of Pocket",
-  message: "Hello there",
-  "cf-turnstile-response": "tok",
+  [FIELDS.firstName]: "Ada",
+  [FIELDS.lastName]: "Lovelace",
+  [FIELDS.email]: "ada@example.com",
+  [FIELDS.phone]: "(503) 555-0100",
+  [FIELDS.service]: "Individual Counseling",
+  [FIELDS.payment]: "Out of Pocket",
+  [FIELDS.message]: "Hello there",
+  [FIELDS.turnstile]: "tok",
 };
+
+/** What siteverify returns for a token minted on the live form. */
+const GOOD_VERDICT = { success: true, action: "contact", hostname: "bjohnsoncounseling.com" };
 
 function makeEnv(overrides = {}) {
   return {
@@ -41,16 +45,16 @@ function makeEnv(overrides = {}) {
 }
 
 /** Stub the siteverify call. Returns the spy so tests can assert on it. */
-function stubSiteverify(verdict = { success: true }) {
+function stubSiteverify(verdict = GOOD_VERDICT) {
   const fn = vi.fn(async () => Response.json(verdict));
   vi.stubGlobal("fetch", fn);
   return fn;
 }
 
-function post(fields = {}, { env, json = true, method = "POST", cf } = {}) {
+function post(fields = {}, { env, json = true, method = "POST", cf, headers: extra = {} } = {}) {
   const body = new FormData();
   for (const [k, v] of Object.entries(fields)) body.set(k, v);
-  const headers = { "CF-Connecting-IP": IP };
+  const headers = { "CF-Connecting-IP": IP, ...extra };
   if (json) headers.Accept = "application/json";
   const init = method === "GET" ? { method, headers } : { method, body, headers };
   if (cf) init.cf = cf;
@@ -86,10 +90,12 @@ function headerOf(raw, name) {
   return m ? decodeMimeWords(m[1].trim()) : null;
 }
 
-/** Everything after the first blank line. */
+/** Everything after the first blank line, decoded when the part is base64. */
 function bodyOf(raw) {
   const m = raw.match(/\r?\n\r?\n([\s\S]*)$/);
-  return m ? m[1] : "";
+  const body = m ? m[1] : "";
+  if (!/^Content-Transfer-Encoding:\s*base64$/im.test(raw)) return body;
+  return new TextDecoder().decode(Uint8Array.from(atob(body.replace(/\s/g, "")), (c) => c.charCodeAt(0)));
 }
 
 const sentMessage = (env) => env.CONTACT_EMAIL.send.mock.calls[0][0];
@@ -134,6 +140,52 @@ describe("rate limiting", () => {
   });
 });
 
+describe("cross-site Origin", () => {
+  it.each(["https://bjohnsoncounseling.com", "https://www.bjohnsoncounseling.com"])(
+    "accepts a POST from %s",
+    async (origin) => {
+      const env = makeEnv();
+      stubSiteverify();
+      const res = await post(VALID, { env, headers: { Origin: origin } });
+      expect(res.status).toBe(200);
+      expect(env.CONTACT_EMAIL.send).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it.each(["https://evil.example", "https://bjohnsoncounseling.pages.dev", "null"])(
+    "403s a POST whose Origin is %s, before rate limiting or Turnstile",
+    async (origin) => {
+      const env = makeEnv();
+      const siteverify = stubSiteverify();
+      const res = await post(VALID, { env, headers: { Origin: origin } });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ ok: false, error: "verification" });
+      expect(env.RATE_LIMITER.limit).not.toHaveBeenCalled();
+      expect(siteverify).not.toHaveBeenCalled();
+      expect(env.CONTACT_EMAIL.send).not.toHaveBeenCalled();
+    },
+  );
+});
+
+describe("body size", () => {
+  it("413s a body declared over the limit without parsing it", async () => {
+    const env = makeEnv();
+    const siteverify = stubSiteverify();
+    const res = await post(VALID, { env, headers: { "Content-Length": String(MAX_BODY_BYTES + 1) } });
+    expect(res.status).toBe(413);
+    expect(await res.json()).toEqual({ ok: false, error: "malformed" });
+    expect(siteverify).not.toHaveBeenCalled();
+    expect(env.CONTACT_EMAIL.send).not.toHaveBeenCalled();
+  });
+
+  it("accepts a body declared at the limit", async () => {
+    const env = makeEnv();
+    stubSiteverify();
+    const res = await post(VALID, { env, headers: { "Content-Length": String(MAX_BODY_BYTES) } });
+    expect(res.status).toBe(200);
+  });
+});
+
 describe("malformed body", () => {
   it("400s when the body isn't form data", async () => {
     const res = await worker.fetch(
@@ -151,24 +203,33 @@ describe("malformed body", () => {
 });
 
 describe("honeypot", () => {
-  it("pretends success and sends nothing when company is filled", async () => {
+  it("is not a field a browser would autofill", () => {
+    // Chrome and Safari fill fields whose name or label matches an address or
+    // identity heuristic, from a saved profile, regardless of autocomplete="off".
+    expect(FIELDS.honeypot).not.toMatch(/company|organi[sz]ation|name|email|phone|address|url|website|title|fax/i);
+  });
+
+  it("pretends success and sends nothing when the honeypot is filled", async () => {
     const env = makeEnv();
     const siteverify = stubSiteverify();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const res = await post({ ...VALID, company: "i am a bot" }, { env });
+    const res = await post({ ...VALID, [FIELDS.honeypot]: "i am a bot" }, { env });
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
     expect(env.CONTACT_EMAIL.send).not.toHaveBeenCalled();
     // Bails before Turnstile too — a bot shouldn't cost a siteverify call.
     expect(siteverify).not.toHaveBeenCalled();
+    // The only trace, so a false positive can be spotted in Workers Logs.
+    expect(warn).toHaveBeenCalledWith("honeypot tripped");
   });
 
-  it("sends normally when company is present but empty", async () => {
+  it("sends normally when the honeypot is present but empty", async () => {
     const env = makeEnv();
     stubSiteverify();
 
-    const res = await post({ ...VALID, company: "" }, { env });
+    const res = await post({ ...VALID, [FIELDS.honeypot]: "" }, { env });
 
     expect(res.status).toBe(200);
     expect(env.CONTACT_EMAIL.send).toHaveBeenCalledTimes(1);
@@ -176,7 +237,15 @@ describe("honeypot", () => {
 });
 
 describe("field validation", () => {
-  it.each(["firstName", "lastName", "email", "phone", "service", "payment", "message"])(
+  it.each([
+    FIELDS.firstName,
+    FIELDS.lastName,
+    FIELDS.email,
+    FIELDS.phone,
+    FIELDS.service,
+    FIELDS.payment,
+    FIELDS.message,
+  ])(
     "400s when %s is empty",
     async (field) => {
       const env = makeEnv();
@@ -199,6 +268,13 @@ describe("field validation", () => {
     ["no @", "not-an-email"],
     ["no dot in the domain", "ada@example"],
     ["a space", "ada lovelace@example.com"],
+    // Characters that mean something in a Reply-To header must not pass through.
+    ["angle brackets", "<ada@example.com>"],
+    ["a trailing angle bracket", "ada@example.com>"],
+    ["a quote", 'ada"@example.com'],
+    ["a comma", "ada,bob@example.com"],
+    ["parentheses", "ada(comment)@example.com"],
+    ["a trailing dot", "ada@example.com."],
   ])("400s on a malformed email: %s", async (_label, email) => {
     const env = makeEnv();
     stubSiteverify();
@@ -279,6 +355,42 @@ describe("length limits", () => {
   });
 });
 
+describe("body encoding", () => {
+  // SMTP lines are capped at 998 characters and 7bit bodies can't carry
+  // non-ASCII, so the body goes out base64 (wrapped at 76) rather than raw.
+  it("sends the body as base64, with no raw line over the SMTP limit", async () => {
+    const env = makeEnv();
+    stubSiteverify();
+
+    await post({ ...VALID, message: "x".repeat(2_000) }, { env });
+
+    const raw = rawOf(sentMessage(env));
+    expect(headerOf(raw, "Content-Transfer-Encoding")).toBe("base64");
+    expect(raw.split(/\r?\n/).every((line) => line.length <= 998)).toBe(true);
+    expect(bodyOf(raw)).toContain("x".repeat(2_000));
+  });
+
+  it("round-trips accents, emoji and CJK", async () => {
+    const env = makeEnv();
+    stubSiteverify();
+
+    await post({ ...VALID, message: "Café ☕ 你好 🙂" }, { env });
+
+    expect(bodyOf(rawOf(sentMessage(env)))).toContain("Café ☕ 你好 🙂");
+  });
+
+  it("truncates the message by characters, not bytes", async () => {
+    const env = makeEnv();
+    stubSiteverify();
+
+    await post({ ...VALID, message: "é".repeat(MAX.message + 10) }, { env });
+
+    const body = bodyOf(rawOf(sentMessage(env)));
+    expect(body).toContain("é".repeat(MAX.message));
+    expect(body).not.toContain("é".repeat(MAX.message + 1));
+  });
+});
+
 describe("Turnstile", () => {
   /** Asserts a rejected submission: 403 "verification", and nothing sent. */
   async function expectRejected(res, env) {
@@ -320,6 +432,25 @@ describe("Turnstile", () => {
     const env = makeEnv();
     stubSiteverify({ success: true, action: "login", hostname: "bjohnsoncounseling.com" });
     await expectRejected(await post(VALID, { env }), env);
+  });
+
+  // Only the always-pass test secret returns a verdict without action and
+  // hostname. If that secret were ever set in production, honouring such a
+  // verdict would let any token from anywhere unlock the form.
+  it("403s a verdict without action and hostname", async () => {
+    const env = makeEnv();
+    stubSiteverify({ success: true });
+    await expectRejected(await post(VALID, { env }), env);
+  });
+
+  it("accepts a verdict without action and hostname only when TURNSTILE_DEV is set", async () => {
+    const env = makeEnv({ TURNSTILE_DEV: "1" });
+    stubSiteverify({ success: true });
+
+    const res = await post(VALID, { env });
+
+    expect(res.status).toBe(200);
+    expect(env.CONTACT_EMAIL.send).toHaveBeenCalledTimes(1);
   });
 
   it("403s a token minted on the pages.dev preview", async () => {
@@ -405,7 +536,7 @@ describe("message shape", () => {
     expect(msg.to).toBe("inbox@example.com");
 
     const raw = rawOf(msg);
-    expect(headerOf(raw, "From")).toBe("BJC contact form <contact@bjohnsoncounseling.com>");
+    expect(headerOf(raw, "From")).toBe("Brandon Johnson Counseling website <contact@bjohnsoncounseling.com>");
     expect(headerOf(raw, "To")).toContain("inbox@example.com");
     // Replying must go to the submitter, not back to the unattended sender.
     expect(headerOf(raw, "Reply-To")).toContain("ada@example.com");

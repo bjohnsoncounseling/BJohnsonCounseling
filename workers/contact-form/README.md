@@ -85,8 +85,20 @@ this account on 2026-10-14.
 - A **rate-limiting binding** (`[[ratelimits]]` in `wrangler.toml`) caps
   submissions at 5/minute per client IP → 429 with a "wait a minute" message.
   Best-effort per Cloudflare location — a cost cap, not a security boundary.
-- A hidden **honeypot** (`company` field) — a filled value "succeeds" without
-  sending anything.
+- A hidden **honeypot** (the `leave_blank` field; the name is chosen to match
+  no browser autofill heuristic) — a filled value "succeeds" without sending
+  anything and leaves a `honeypot tripped` warning in Workers Logs, so a run of
+  them is visible.
+- A POST whose `Origin` header is not one of `TURNSTILE_HOSTNAMES` is refused
+  before any work; so is a body declared over 64 KB.
+
+## Shared contract with the page
+
+Field names, length limits and error codes live in
+[`shared/contact-contract.js`](../../shared/contact-contract.js) at the repo
+root, imported by this Worker, by `src/components/ContactForm.astro`, and by
+the tests on both sides. Change a field there and both deployables follow;
+`npm test` at the repo root checks the built page against it.
 
 ## Development notes
 
@@ -95,7 +107,9 @@ this account on 2026-10-14.
   `TURNSTILE_SECRET` and `DEST_EMAIL` in a local `.dev.vars` file (gitignored).
   For local testing use Turnstile's always-passes test secret
   `1x0000000000000000000000000000000AA` and a matching test **site** key
-  `1x00000000000000000000AA` in `src/config/site.ts`.
+  `1x00000000000000000000AA` in `src/config/site.ts`. That secret's verdicts
+  carry no action or hostname, which the Worker refuses unless
+  `TURNSTILE_DEV=1` is also set in `.dev.vars` — never set it in production.
 - `npm test` runs the Worker's tests inside workerd, with Turnstile stubbed and
   nothing actually sent (no auth or secrets needed). CI runs these on every PR.
   They can't prove real delivery: that still takes the live form.

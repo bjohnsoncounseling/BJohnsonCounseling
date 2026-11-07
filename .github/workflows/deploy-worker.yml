@@ -35,6 +35,9 @@ jobs:
     steps:
       - name: Explain a skipped deploy
         if: env.CLOUDFLARE_API_TOKEN == ''
+        # Runs before checkout, so the job-level working directory does not
+        # exist yet; bash must start from the runner root instead.
+        working-directory: .
         run: echo "::warning::CLOUDFLARE_API_TOKEN is not set, so the Worker was not deployed. Deploy with 'npm run deploy' in workers/contact-form, or add the secret (see OPERATIONS.md)."
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

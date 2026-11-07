@@ -19,6 +19,8 @@
   --accent-strong: #a85a3c; /* button bg: white text = 5.01:1 */
   --accent-strong-hover: #904b30;
   --accent-text: #a35c3e; /* link text on white = 5.05:1 */
+  --accent-text-sand: #8a4730; /* link text on --sand = 4.92:1 (--accent-text is only 3.58:1 there) */
+  --ink-muted: #596462; /* de-emphasised text on white = 6.13:1; use opacity for this and it drops below 4.5:1 */
   --rule: rgba(63, 74, 73, 0.18);
 
   /* Type. Heading face is set in one place so Phase 2's comparison resolves to

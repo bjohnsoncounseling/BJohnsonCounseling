@@ -5,15 +5,15 @@ import type { ImageMetadata } from 'astro';
 interface Props {
   /** The page's single h1. */
   title: string;
+  /** Decorative: the h1 carries the meaning, so the image is announced as nothing. */
   image: ImageMetadata;
-  alt: string;
 }
 
-const { title, image, alt } = Astro.props;
+const { title, image } = Astro.props;
 ---
 
 <section class="page-hero">
-  <Image src={image} alt={alt} class="page-hero__image" widths={[900, 1600]} sizes="100vw" loading="eager" fetchpriority="high" />
+  <Image src={image} alt="" class="page-hero__image" widths={[900, 1600]} sizes="100vw" loading="eager" fetchpriority="high" />
   <div class="page-hero__body container">
     <h1 class="measure">{title}</h1>
   </div>

@@ -278,14 +278,12 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
     </Fragment>
   )}
 
-  <div class="form__actions">
-    <button type="submit" class="form__submit">
-      Send
-    </button>
-    <p class="form__alt">
-      Prefer to talk? Call <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a>.
-    </p>
-  </div>
+  {/* No "or call me" beside Send, on purpose: Brandon's phone availability is
+      far more limited than email, and the number is on the contact page and
+      in the footer for anyone who needs it. */}
+  <button type="submit" class="form__submit">
+    Send
+  </button>
 </form>
 
 <style>
@@ -425,23 +423,6 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
 
   .form__submit:hover {
     background: var(--accent-strong-hover);
-  }
-
-  /* The call option sits beside Send, for people who would rather talk. */
-  .form__actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-sm) var(--space-md);
-  }
-
-  .form__alt {
-    margin: 0;
-    font-size: 0.95rem;
-  }
-
-  .form__alt a {
-    color: var(--accent-text);
   }
 
   @media (min-width: 32rem) {

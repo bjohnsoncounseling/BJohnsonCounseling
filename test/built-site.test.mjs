@@ -22,13 +22,13 @@ before(() => {
   assert.ok(existsSync(dist('index.html')), 'dist/ not found — run `npm run build` first.');
 });
 
-describe('internal links', () => {
-  /** Built pages as dist-relative posix paths, e.g. `about/index.html`. */
-  const pages = () =>
-    readdirSync(dist(), { recursive: true, encoding: 'utf8' })
-      .map((p) => p.replaceAll('\\', '/'))
-      .filter((p) => p.endsWith('.html'));
+/** Built pages as dist-relative posix paths, e.g. `about/index.html`. */
+const pages = () =>
+  readdirSync(dist(), { recursive: true, encoding: 'utf8' })
+    .map((p) => p.replaceAll('\\', '/'))
+    .filter((p) => p.endsWith('.html'));
 
+describe('internal links', () => {
   /** The dist file serving a pathname: an asset, a directory-format page, or a flat page (404). */
   const resolve = (pathname) => {
     const rel = decodeURIComponent(pathname).replace(/^\/+|\/+$/g, '');
@@ -65,6 +65,32 @@ describe('internal links', () => {
     assert.deepEqual(broken, []);
     // Guards against the regex above quietly matching nothing.
     assert.ok(checked > 20, `only ${checked} internal links found`);
+  });
+});
+
+describe('content security policy', () => {
+  const headers = () => readFileSync(dist('_headers'), 'utf8');
+
+  it('allows no inline scripts', () => {
+    const scriptSrc = headers().match(/Content-Security-Policy:.*?script-src ([^;]*);/)?.[1];
+    assert.ok(scriptSrc, 'no script-src directive in dist/_headers');
+    assert.doesNotMatch(scriptSrc, /'unsafe-inline'/);
+  });
+
+  // Astro inlines small bundled scripts unless told not to (astro.config.mjs);
+  // an inline script would be blocked by the policy above and fail silently
+  // in production. Data blocks (application/ld+json) are never executed and
+  // are exempt from the policy, so they are allowed here too.
+  it('ships every executable script as an external file', () => {
+    const inline = [];
+    for (const page of pages()) {
+      const html = readFileSync(dist(page), 'utf8');
+      for (const [tag] of html.matchAll(/<script\b[^>]*>/g)) {
+        if (/\bsrc="/.test(tag) || /\btype="application\/ld\+json"/.test(tag)) continue;
+        inline.push(`${page}: ${tag}`);
+      }
+    }
+    assert.deepEqual(inline, []);
   });
 });
 

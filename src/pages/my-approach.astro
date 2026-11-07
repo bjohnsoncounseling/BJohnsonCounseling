@@ -10,45 +10,48 @@ import mtHood from '../assets/images/mt-hood.jpg';
 const issues = [
   'Abuse',
   'Anxiety',
-  'Compassion Fatigue',
-  'Complex Trauma',
+  'Compassion fatigue',
+  'Complex trauma',
   'Depression',
-  'Dissociative Disorders (DID)',
-  'Faith Deconstruction/Reconstruction',
+  'Dissociative disorders (DID)',
+  'Faith deconstruction/reconstruction',
   'Panic',
-  'Personal Growth',
+  'Personal growth',
   'PTSD',
-  'Relationship / Marriage Issues',
-  'Religious/Spiritual Trauma',
-  'Self-Esteem',
-  'Sexual Abuse',
-  'Social Phobia',
+  'Relationship / marriage issues',
+  'Religious/spiritual trauma',
+  'Self-esteem',
+  'Sexual abuse',
+  'Social phobia',
   'Spirituality',
 ];
 
+// Named modalities keep their capitals (they are names, and the About page
+// writes them that way); the rest is sentence case. Rendered as written: the
+// old all-caps, letter-spaced list was hard going for dyslexic readers.
 const techniques = [
   'Acceptance and Commitment Therapy (ACT)',
-  'Attachment Theory',
-  ...(offerCouplesCounseling ? ['Couples Counseling'] : []),
-  'EMDR (Eye-Movement Desensitization & Reprocessing Therapy)',
-  'Emotionally Focused/Emotion-Focused Therapy',
-  'Existential Psychotherapy',
-  'Feminist Therapy',
-  'Holistic Therapy',
-  'Humanistic Therapy',
-  'Individual Therapy',
-  'Interpersonal Neurobiology',
-  'Mindfulness-Based Therapy',
+  'Attachment theory',
+  ...(offerCouplesCounseling ? ['Couples counseling'] : []),
+  'EMDR (Eye Movement Desensitization and Reprocessing)',
+  'Emotionally Focused Therapy (EFT) and Emotion-Focused Therapy',
+  'Existential psychotherapy',
+  'Feminist therapy',
+  'Holistic therapy',
+  'Humanistic therapy',
+  'Individual therapy',
+  'Interpersonal neurobiology',
+  'Mindfulness-based therapy',
   'Nonviolent Communication',
-  'Person-Centered Therapy',
-  'Systems Theory',
+  'Person-centered therapy',
+  'Systems theory',
 ];
 
 const hero = await heroImage(mtHood);
 ---
 
 <BaseLayout
-  title="My Approach"
+  title="EFT, ACT and EMDR: How I Work"
   description="An approach rooted in relationships, EFT, ACT, and EMDR — respecting each person’s story and building toward their goals from there."
   preloadImage={hero}
 >
@@ -116,8 +119,6 @@ const hero = await heroImage(mtHood);
   .tags li {
     padding-block: var(--space-2xs);
     border-bottom: 1px solid var(--rule);
-    font-size: 1rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 1.05rem;
   }
 </style>

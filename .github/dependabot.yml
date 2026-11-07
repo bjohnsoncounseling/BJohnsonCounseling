@@ -39,7 +39,7 @@ updates:
         # transitive majors. Keep this list in step with package.json: any
         # direct dependency whose version starts with 0. belongs here.
         exclude-patterns:
-          - "@astrojs/check"
+          - '@astrojs/check'
 
   # Worker: workers/contact-form (wrangler, mimetext). Separate lockfile.
   - package-ecosystem: npm

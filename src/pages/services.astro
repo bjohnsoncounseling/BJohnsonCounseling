@@ -25,18 +25,26 @@ const hero = await heroImage(heroTree);
     <div class="container">
       <h2 class="center">My services</h2>
       <div class="services">
-        {
-          services.map((service) => (
-            <article class="service">
-              <Image src={service.image} alt={service.alt} widths={serviceImageWidths} width={serviceImageWidths.at(-1)} sizes="(max-width: 48rem) 90vw, 26rem" />
-              <div class="service__text prose">
-                <h3>{service.title}</h3>
-                <p>{service.body}</p>
-                {service.note && <p><strong>{service.note}</strong></p>}
-              </div>
-            </article>
-          ))
-        }
+        {services.map((service) => (
+          <article class="service">
+            <Image
+              src={service.image}
+              alt={service.alt}
+              widths={serviceImageWidths}
+              width={serviceImageWidths.at(-1)}
+              sizes="(max-width: 48rem) 90vw, 26rem"
+            />
+            <div class="service__text prose">
+              <h3>{service.title}</h3>
+              <p>{service.body}</p>
+              {service.note && (
+                <p>
+                  <strong>{service.note}</strong>
+                </p>
+              )}
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   </section>

@@ -12,34 +12,39 @@ import { acceptingNewClients, address, contact, practitioner, unavailableNotice 
     <div class="container">
       <h1>Contact me.</h1>
 
-      {
-        !acceptingNewClients && (
-          <p class="notice" role="status">
-            {unavailableNotice}
-          </p>
-        )
-      }
+      {!acceptingNewClients && (
+        <p class="notice" role="status">
+          {unavailableNotice}
+        </p>
+      )}
 
       <div class="contact">
         <div class="contact__details">
           <p class="contact__who">
-            <strong>{practitioner.name}, {practitioner.degree}</strong><br />
-            {practitioner.pronouns}<br />
-            {
-              practitioner.licenses.map((l) => (
-                <>{l.state} {l.title} ({l.abbr})<br /></>
-              ))
-            }
+            <strong>
+              {practitioner.name}, {practitioner.degree}
+            </strong>
+            <br />
+            {practitioner.pronouns}
+            <br />
+            {practitioner.licenses.map((l) => (
+              <>
+                {l.state} {l.title} ({l.abbr})<br />
+              </>
+            ))}
           </p>
 
           <p>
-            <a href={`mailto:${contact.email}`}>{contact.email}</a><br />
-            phone: <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a><br />
+            <a href={`mailto:${contact.email}`}>{contact.email}</a>
+            <br />
+            phone: <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a>
+            <br />
             fax: {contact.fax}
           </p>
 
           <address>
-            {address.street}<br />
+            {address.street}
+            <br />
             {address.city}, {address.state} {address.zip}
           </address>
         </div>

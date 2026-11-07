@@ -9,14 +9,15 @@ import { nav } from '../config/site';
     <div class="container measure center">
       <p class="code">404</p>
       <h1>This page can’t be found</h1>
-      <p>
-        The page you were looking for may have moved or no longer exists. Let’s get you
-        back on the path.
+      <p>The page you were looking for may have moved or no longer exists. Let’s get you back on the path.</p>
+      <p class="cta">
+        <Button href="/">Return home</Button>
       </p>
-      <p class="cta"><Button href="/">Return home</Button></p>
 
       <nav class="links" aria-label="Site pages">
-        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        {nav.map((item) => (
+          <a href={item.href}>{item.label}</a>
+        ))}
       </nav>
     </div>
   </section>

@@ -41,18 +41,24 @@ const beliefs = [
         <div class="bio__text prose">
           <h2>Who I Am</h2>
           <p class="credentials">
-            <strong>{practitioner.name}, {practitioner.degree}</strong><br />
-            {practitioner.pronouns}<br />
-            {
-              practitioner.licenses.map((l) => (
-                <>
-                  {l.title}<br />
-                  {l.state} #{l.number}<br />
-                </>
-              ))
-            }
+            <strong>
+              {practitioner.name}, {practitioner.degree}
+            </strong>
+            <br />
+            {practitioner.pronouns}
+            <br />
+            {practitioner.licenses.map((l) => (
+              <>
+                {l.title}
+                <br />
+                {l.state} #{l.number}
+                <br />
+              </>
+            ))}
           </p>
-          {beliefs.map((p) => <p>{p}</p>)}
+          {beliefs.map((p) => (
+            <p>{p}</p>
+          ))}
         </div>
       </div>
     </div>

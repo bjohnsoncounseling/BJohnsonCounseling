@@ -130,11 +130,12 @@ describe('contact form and Worker agree', () => {
     const read = [...worker.matchAll(/form\.get\(FIELDS\.(\w+)\)/g)].map((m) => m[1]);
 
     assert.deepEqual([...new Set(read)].sort(), Object.keys(FIELDS).sort());
-    assert.doesNotMatch(worker, /form\.get\("/, 'the Worker reads a field by a literal name');
+    assert.doesNotMatch(worker, /form\.get\(["']/, 'the Worker reads a field by a literal name');
   });
 
   it('caps each text field at the length the Worker keeps', () => {
-    const maxlength = (name) => Number(capture(form, new RegExp(`<(?:input|textarea)\\b[^>]*\\bname="${name}"[^>]*\\bmaxlength="(\\d+)"`)));
+    const maxlength = (name) =>
+      Number(capture(form, new RegExp(`<(?:input|textarea)\\b[^>]*\\bname="${name}"[^>]*\\bmaxlength="(\\d+)"`)));
 
     assert.equal(maxlength(FIELDS.firstName), MAX.name);
     assert.equal(maxlength(FIELDS.lastName), MAX.name);
@@ -155,10 +156,13 @@ describe('contact form and Worker agree', () => {
   });
 
   it('has a message for every error the Worker can return', () => {
-    const codes = [...worker.matchAll(/respond\(\d+, "([^"]+)"\)/g)].map((m) => m[1]);
+    const codes = [...worker.matchAll(/respond\(\d+, ["']([^"']+)["']\)/g)].map((m) => m[1]);
 
     assert.ok(codes.length > 0, 'no error codes found in the Worker');
-    assert.deepEqual(codes.filter((code) => !ERRORS[code]), []);
+    assert.deepEqual(
+      codes.filter((code) => !ERRORS[code]),
+      [],
+    );
   });
 
   it('offers no service or payment option the Worker would cut short', () => {
@@ -166,7 +170,10 @@ describe('contact form and Worker agree', () => {
       const select = capture(form, new RegExp(`(<select\\b[^>]*\\bname="${FIELDS[field]}"[\\s\\S]*?</select>)`));
       const options = [...select.matchAll(/<option value="([^"]*)"/g)].map((m) => m[1]);
       assert.ok(options.length > 1, `no ${field} options found`);
-      assert.deepEqual(options.filter((o) => o.length > MAX[field]), []);
+      assert.deepEqual(
+        options.filter((o) => o.length > MAX[field]),
+        [],
+      );
     }
   });
 });

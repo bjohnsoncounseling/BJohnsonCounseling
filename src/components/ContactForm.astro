@@ -16,8 +16,8 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
     Thank you &mdash; your message has been sent. I&rsquo;ll be in touch.
   </p>
   <p class="status__error" data-status-error role="alert" hidden>
-    <span data-status-message></span>{' '}
-    You can also email <a href={`mailto:${contact.email}`}>{contact.email}</a> directly.
+    <span data-status-message></span> You can also email <a href={`mailto:${contact.email}`}>{contact.email}</a>{' '}
+    directly.
   </p>
 </div>
 
@@ -135,54 +135,83 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
 
 <form class="form" method="POST" action="/api/contact" novalidate>
   <p class="form__notice">
-    Please don&rsquo;t include sensitive health details in this message &mdash; just enough
-    to get in touch. This form is not a secure or confidential channel, and it isn&rsquo;t
-    for emergencies. If you are in crisis, call or text <a href="tel:988">988</a>, or call{' '}
-    <a href="tel:911">911</a>.
+    Please don&rsquo;t include sensitive health details in this message &mdash; just enough to get in touch. This form
+    is not a secure or confidential channel, and it isn&rsquo;t for emergencies. If you are in crisis, call or text{' '}
+    <a href="tel:988">988</a>, or call <a href="tel:911">911</a>.
   </p>
 
   <fieldset class="form__group">
-    <legend>Name <span class="req">(required)</span></legend>
+    <legend>
+      Name <span class="req">(required)</span>
+    </legend>
     <div class="form__row">
       <p class="field">
         <label for="firstName">First Name</label>
-        <input id="firstName" name={FIELDS.firstName} type="text" autocomplete="given-name" maxlength={MAX.name} required />
+        <input
+          id="firstName"
+          name={FIELDS.firstName}
+          type="text"
+          autocomplete="given-name"
+          maxlength={MAX.name}
+          required
+        />
       </p>
       <p class="field">
         <label for="lastName">Last Name</label>
-        <input id="lastName" name={FIELDS.lastName} type="text" autocomplete="family-name" maxlength={MAX.name} required />
+        <input
+          id="lastName"
+          name={FIELDS.lastName}
+          type="text"
+          autocomplete="family-name"
+          maxlength={MAX.name}
+          required
+        />
       </p>
     </div>
   </fieldset>
 
   <p class="field">
-    <label for="phone">Phone <span class="req">(required)</span></label>
+    <label for="phone">
+      Phone <span class="req">(required)</span>
+    </label>
     <input id="phone" name={FIELDS.phone} type="tel" autocomplete="tel" maxlength={MAX.phone} required />
   </p>
 
   <p class="field">
-    <label for="email">Email <span class="req">(required)</span></label>
+    <label for="email">
+      Email <span class="req">(required)</span>
+    </label>
     <input id="email" name={FIELDS.email} type="email" autocomplete="email" maxlength={MAX.email} required />
   </p>
 
   <p class="field">
-    <label for="service">Service Requested <span class="req">(required)</span></label>
+    <label for="service">
+      Service Requested <span class="req">(required)</span>
+    </label>
     <select id="service" name={FIELDS.service} required>
       <option value="">Select an option</option>
-      {serviceOptions.map((o) => <option value={o}>{o}</option>)}
+      {serviceOptions.map((o) => (
+        <option value={o}>{o}</option>
+      ))}
     </select>
   </p>
 
   <p class="field">
-    <label for="payment">Payment Method <span class="req">(required)</span></label>
+    <label for="payment">
+      Payment Method <span class="req">(required)</span>
+    </label>
     <select id="payment" name={FIELDS.payment} required data-payment-options={JSON.stringify(paymentOptions)}>
       <option value="">Select an option</option>
-      {allPaymentOptions.map((o) => <option value={o}>{o}</option>)}
+      {allPaymentOptions.map((o) => (
+        <option value={o}>{o}</option>
+      ))}
     </select>
   </p>
 
   <p class="field">
-    <label for="message">Message <span class="req">(required)</span></label>
+    <label for="message">
+      Message <span class="req">(required)</span>
+    </label>
     <textarea id="message" name={FIELDS.message} rows="6" maxlength={MAX.message} required></textarea>
   </p>
 
@@ -202,11 +231,18 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
   {turnstileSiteKey && (
     <Fragment>
       <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <div id="contact-turnstile" class="cf-turnstile" data-sitekey={turnstileSiteKey} data-action={turnstileAction}></div>
+      <div
+        id="contact-turnstile"
+        class="cf-turnstile"
+        data-sitekey={turnstileSiteKey}
+        data-action={turnstileAction}
+      ></div>
     </Fragment>
   )}
 
-  <button type="submit" class="form__submit">Send</button>
+  <button type="submit" class="form__submit">
+    Send
+  </button>
 </form>
 
 <style>

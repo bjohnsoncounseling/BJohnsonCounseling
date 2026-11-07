@@ -11,6 +11,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test \"test/**/*.test.mjs\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "astro": "astro"
   },
   "dependencies": {

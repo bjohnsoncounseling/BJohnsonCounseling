@@ -4,11 +4,11 @@ The website for Brandon Johnson Counseling, a solo therapy practice in SE
 Portland. A static [Astro](https://astro.build) site on Cloudflare Pages, with
 one piece of server code: a Cloudflare Worker that delivers the contact form.
 
-| Part | Where | Deployed how |
-|---|---|---|
-| Site (seven pages + 404) | `src/` | Cloudflare Pages builds `main` on every push and every PR gets a `*.pages.dev` preview |
-| Contact-form backend | `workers/contact-form/` | `npm run deploy` there, or the `Deploy Worker` workflow on a push to `main` once the `CLOUDFLARE_API_TOKEN` secret exists (see [OPERATIONS.md](OPERATIONS.md)) |
-| Form/Worker contract | `shared/contact-contract.js` | Imported by both; nothing to deploy |
+| Part                     | Where                        | Deployed how                                                                                                                                                   |
+| ------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Site (seven pages + 404) | `src/`                       | Cloudflare Pages builds `main` on every push and every PR gets a `*.pages.dev` preview                                                                         |
+| Contact-form backend     | `workers/contact-form/`      | `npm run deploy` there, or the `Deploy Worker` workflow on a push to `main` once the `CLOUDFLARE_API_TOKEN` secret exists (see [OPERATIONS.md](OPERATIONS.md)) |
+| Form/Worker contract     | `shared/contact-contract.js` | Imported by both; nothing to deploy                                                                                                                            |
 
 Everything about the practice that appears on a page (name, licences, address,
 phone, rates, insurers, memberships, services, nav) lives in

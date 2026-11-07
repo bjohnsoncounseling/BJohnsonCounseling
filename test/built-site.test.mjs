@@ -3,13 +3,15 @@
 //
 // Two things nothing else catches: internal links that lead nowhere, and the
 // contact form drifting apart from its Worker. The form and the Worker deploy
-// separately and share no code, so a renamed field or a mismatched Turnstile
-// action would only show up as inquiries that never arrive.
+// separately; what they share is shared/contact-contract.js (field names,
+// length limits, error codes), so these tests check the built page and the
+// Worker source against the contract rather than against each other.
 
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { before, describe, it } from 'node:test';
+import { ERRORS, FIELDS, MAX } from '../shared/contact-contract.js';
 
 const SITE_HOSTS = new Set(['bjohnsoncounseling.com', 'www.bjohnsoncounseling.com']);
 
@@ -90,13 +92,29 @@ describe('contact form and Worker agree', () => {
     assert.ok(wrangler.includes(`pattern = "bjohnsoncounseling.com${action}"`), `no route for ${action}`);
   });
 
-  it('sends exactly the fields the Worker reads', () => {
+  it('sends exactly the fields in the contract', () => {
     const sent = new Set([...form.matchAll(/<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"/g)].map((m) => m[1]));
     // Not in the markup: the Turnstile widget inserts this input when it renders.
-    sent.add('cf-turnstile-response');
-    const read = new Set([...worker.matchAll(/form\.get\("([^"]+)"\)/g)].map((m) => m[1]));
+    sent.add(FIELDS.turnstile);
 
-    assert.deepEqual([...sent].sort(), [...read].sort());
+    assert.deepEqual([...sent].sort(), Object.values(FIELDS).sort());
+  });
+
+  it('is read by the Worker through the contract, every field of it', () => {
+    const read = [...worker.matchAll(/form\.get\(FIELDS\.(\w+)\)/g)].map((m) => m[1]);
+
+    assert.deepEqual([...new Set(read)].sort(), Object.keys(FIELDS).sort());
+    assert.doesNotMatch(worker, /form\.get\("/, 'the Worker reads a field by a literal name');
+  });
+
+  it('caps each text field at the length the Worker keeps', () => {
+    const maxlength = (name) => Number(capture(form, new RegExp(`<(?:input|textarea)\\b[^>]*\\bname="${name}"[^>]*\\bmaxlength="(\\d+)"`)));
+
+    assert.equal(maxlength(FIELDS.firstName), MAX.name);
+    assert.equal(maxlength(FIELDS.lastName), MAX.name);
+    assert.equal(maxlength(FIELDS.email), MAX.email);
+    assert.equal(maxlength(FIELDS.phone), MAX.phone);
+    assert.equal(maxlength(FIELDS.message), MAX.message);
   });
 
   it('asks Turnstile for the action the Worker requires', () => {
@@ -111,22 +129,18 @@ describe('contact form and Worker agree', () => {
   });
 
   it('has a message for every error the Worker can return', () => {
-    const messages = JSON.parse(capture(page, /errorReasons = (\{.*?\});/));
     const codes = [...worker.matchAll(/respond\(\d+, "([^"]+)"\)/g)].map((m) => m[1]);
 
     assert.ok(codes.length > 0, 'no error codes found in the Worker');
-    assert.deepEqual(codes.filter((code) => !messages[code]), []);
+    assert.deepEqual(codes.filter((code) => !ERRORS[code]), []);
   });
 
   it('offers no service or payment option the Worker would cut short', () => {
-    const limits = capture(worker, /const MAX = (\{.*?\});/);
-    const limit = (field) => Number(capture(limits, new RegExp(`\\b${field}: (\\d+)`)));
-
     for (const field of ['service', 'payment']) {
-      const select = capture(form, new RegExp(`(<select\\b[^>]*\\bname="${field}"[\\s\\S]*?</select>)`));
+      const select = capture(form, new RegExp(`(<select\\b[^>]*\\bname="${FIELDS[field]}"[\\s\\S]*?</select>)`));
       const options = [...select.matchAll(/<option value="([^"]*)"/g)].map((m) => m[1]);
       assert.ok(options.length > 1, `no ${field} options found`);
-      assert.deepEqual(options.filter((o) => o.length > limit(field)), []);
+      assert.deepEqual(options.filter((o) => o.length > MAX[field]), []);
     }
   });
 });

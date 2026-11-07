@@ -1,25 +1,16 @@
 ---
 import { contact, paymentOptions, serviceOptions, turnstileAction, turnstileSiteKey } from '../config/site';
+// Field names and length limits shared with the Worker that receives the form.
+import { FIELDS, MAX } from '../../shared/contact-contract.js';
 
 // Without JS the payment select can't follow the service, so it ships every
-// option once and the enhancement script narrows it.
+// option once and the enhancement script narrows it from data-payment-options.
 const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
-
-/**
- * The Cloudflare function redirects back here with ?submitted=ok|error so the
- * result survives without JavaScript. Prerendered pages can't read that at
- * build time, so the banner is revealed client-side from the query string.
- */
-const errorReasons: Record<string, string> = {
-  missing: 'Please fill in every required field.',
-  email: 'That email address doesn’t look right — please check it.',
-  verification: 'We couldn’t verify that you’re human. Please try again.',
-  ratelimited: 'That’s a few messages in a short time. Please wait a minute and try again.',
-  send: 'Something went wrong on our end and the message wasn’t sent.',
-  malformed: 'Something went wrong with that submission. Please try again.',
-};
 ---
 
+{/* The Worker redirects back here with ?submitted=ok|error&reason=… so the
+    result survives without JavaScript; the script below reveals the matching
+    paragraph. Live regions, so the result is announced on that path too. */}
 <div class="status" data-status hidden>
   <p class="status__ok" data-status-ok role="status" hidden>
     Thank you &mdash; your message has been sent. I&rsquo;ll be in touch.
@@ -30,120 +21,116 @@ const errorReasons: Record<string, string> = {
   </p>
 </div>
 
-{/* Deferred until the document is parsed: this script sits above the <form>, so
-    running it immediately would query for elements that don't exist yet. Two
-    jobs: (1) reveal the status banner when we land back here from the no-JS
-    native POST (?submitted=...); (2) progressively enhance the form so visitors
-    with JS submit via fetch and see the result inline, with no full-page
-    navigation. The fetch path is also what lets us confirm the Turnstile token
-    is present before bothering the server. */}
-<script is:inline define:vars={{ errorReasons, paymentOptions }}>
-  (() => {
-    // Shared success/error UI for both paths — reuses the one status banner.
-    const showBanner = (status, reason) => {
-      const box = document.querySelector('[data-status]');
-      const ok = document.querySelector('[data-status-ok]');
-      const err = document.querySelector('[data-status-error]');
-      const msg = document.querySelector('[data-status-message]');
-      const form = document.querySelector('.form');
-      if (!box) return;
+{/* Bundled by Astro into an external module script (so no inline script is
+    needed for it), which runs after the document is parsed. Two jobs: reveal
+    the status banner when we land back here from the no-JS native POST
+    (?submitted=…), and progressively enhance the form so visitors with JS
+    submit via fetch and see the result inline, with no full-page navigation.
+    The fetch path is also what lets us confirm the Turnstile token is present
+    before bothering the server. */}
+<script>
+  import { ERRORS, FIELDS } from '../../shared/contact-contract.js';
 
-      box.hidden = false;
-      if (status === 'ok') {
-        if (ok) ok.hidden = false;
-        if (err) err.hidden = true;
-        if (form) form.hidden = true;
-      } else {
-        if (err) err.hidden = false;
-        if (ok) ok.hidden = true;
-        if (msg) msg.textContent = errorReasons[reason] || 'Something went wrong.';
-      }
-      box.setAttribute('tabindex', '-1');
-      box.focus();
+  const messageFor = (reason: string | null) =>
+    (reason && (ERRORS as Record<string, string>)[reason]) || 'Something went wrong.';
+
+  // Shared success/error UI for both paths — reuses the one status banner.
+  const showBanner = (status: 'ok' | 'error', reason: string | null = null) => {
+    const box = document.querySelector<HTMLElement>('[data-status]');
+    const ok = document.querySelector<HTMLElement>('[data-status-ok]');
+    const err = document.querySelector<HTMLElement>('[data-status-error]');
+    const msg = document.querySelector<HTMLElement>('[data-status-message]');
+    const form = document.querySelector<HTMLFormElement>('.form');
+    if (!box) return;
+
+    box.hidden = false;
+    if (status === 'ok') {
+      if (ok) ok.hidden = false;
+      if (err) err.hidden = true;
+      if (form) form.hidden = true;
+    } else {
+      if (err) err.hidden = false;
+      if (ok) ok.hidden = true;
+      if (msg) msg.textContent = messageFor(reason);
+    }
+    box.setAttribute('tabindex', '-1');
+    box.focus();
+  };
+
+  const enhance = () => {
+    const form = document.querySelector<HTMLFormElement>('.form');
+    const submit = form?.querySelector<HTMLButtonElement>('.form__submit');
+    if (!form || !submit) return;
+
+    const needsTurnstile = !!form.querySelector('.cf-turnstile');
+    const label = submit.textContent;
+
+    // The payment select's options depend on the service chosen above it.
+    const service = form.querySelector<HTMLSelectElement>('#service');
+    const payment = form.querySelector<HTMLSelectElement>('#payment');
+    const paymentOptions: Record<string, string[]> = JSON.parse(payment?.dataset.paymentOptions ?? '{}');
+    const syncPayment = () => {
+      if (!service || !payment) return;
+      const options = paymentOptions[service.value] || [];
+      const previous = payment.value;
+      payment.replaceChildren(
+        new Option(options.length ? 'Select an option' : 'Select a service first', ''),
+        ...options.map((o) => new Option(o, o)),
+      );
+      payment.disabled = !options.length;
+      // Keep the earlier pick when it's still on offer after a service change.
+      if (options.includes(previous)) payment.value = previous;
     };
+    if (service && payment) {
+      service.addEventListener('change', syncPayment);
+      syncPayment();
+    }
 
-    const enhance = () => {
-      const form = document.querySelector('.form');
-      const submit = form && form.querySelector('.form__submit');
-      if (!form || !submit) return;
-
-      const needsTurnstile = !!form.querySelector('.cf-turnstile');
-      const label = submit.textContent;
-
-      // The payment select's options depend on the service chosen above it.
-      const service = form.querySelector('#service');
-      const payment = form.querySelector('#payment');
-      const syncPayment = () => {
-        if (!service || !payment) return;
-        const options = paymentOptions[service.value] || [];
-        const previous = payment.value;
-        payment.replaceChildren(
-          new Option(options.length ? 'Select an option' : 'Select a service first', ''),
-          ...options.map((o) => new Option(o, o))
-        );
-        payment.disabled = !options.length;
-        // Keep the earlier pick when it's still on offer after a service change.
-        if (options.includes(previous)) payment.value = previous;
-      };
-      if (service && payment) {
-        service.addEventListener('change', syncPayment);
-        syncPayment();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
       }
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!form.checkValidity()) {
-          form.reportValidity();
+      if (needsTurnstile) {
+        const token = form.querySelector<HTMLInputElement>(`[name="${FIELDS.turnstile}"]`);
+        if (!token || !token.value) {
+          showBanner('error', 'verification');
           return;
         }
-        if (needsTurnstile) {
-          const token = form.querySelector('[name="cf-turnstile-response"]');
-          if (!token || !token.value) {
-            showBanner('error', 'verification');
-            return;
-          }
+      }
+
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok !== false) {
+          showBanner('ok');
+          return; // the form is hidden now; nothing left to reset
         }
+        showBanner('error', data.error);
+      } catch {
+        showBanner('error', 'send');
+      }
 
-        submit.disabled = true;
-        submit.textContent = 'Sending…';
+      // Turnstile tokens are single-use — the server consumed this one either
+      // way, so the next attempt needs a fresh pass.
+      (window as { turnstile?: { reset(selector: string): void } }).turnstile?.reset('#contact-turnstile');
+      submit.disabled = false;
+      submit.textContent = label;
+    });
+  };
 
-        try {
-          const res = await fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: { Accept: 'application/json' },
-          });
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.ok !== false) {
-            showBanner('ok');
-            return; // the form is hidden now; nothing left to reset
-          }
-          showBanner('error', data.error);
-        } catch {
-          showBanner('error', 'send');
-        }
-
-        // Turnstile tokens are single-use — the server consumed this one either
-        // way, so the next attempt needs a fresh pass.
-        if (window.turnstile) window.turnstile.reset('#contact-turnstile');
-        submit.disabled = false;
-        submit.textContent = label;
-      });
-    };
-
-    const init = () => {
-      const params = new URLSearchParams(window.location.search);
-      const submitted = params.get('submitted');
-      if (submitted) showBanner(submitted === 'ok' ? 'ok' : 'error', params.get('reason'));
-      enhance();
-    };
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  })();
+  const params = new URLSearchParams(window.location.search);
+  const submitted = params.get('submitted');
+  if (submitted) showBanner(submitted === 'ok' ? 'ok' : 'error', params.get('reason'));
+  enhance();
 </script>
 
 <form class="form" method="POST" action="/api/contact" novalidate>
@@ -159,28 +146,28 @@ const errorReasons: Record<string, string> = {
     <div class="form__row">
       <p class="field">
         <label for="firstName">First Name</label>
-        <input id="firstName" name="firstName" type="text" autocomplete="given-name" maxlength="100" required />
+        <input id="firstName" name={FIELDS.firstName} type="text" autocomplete="given-name" maxlength={MAX.name} required />
       </p>
       <p class="field">
         <label for="lastName">Last Name</label>
-        <input id="lastName" name="lastName" type="text" autocomplete="family-name" maxlength="100" required />
+        <input id="lastName" name={FIELDS.lastName} type="text" autocomplete="family-name" maxlength={MAX.name} required />
       </p>
     </div>
   </fieldset>
 
   <p class="field">
     <label for="phone">Phone <span class="req">(required)</span></label>
-    <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" required />
+    <input id="phone" name={FIELDS.phone} type="tel" autocomplete="tel" maxlength={MAX.phone} required />
   </p>
 
   <p class="field">
     <label for="email">Email <span class="req">(required)</span></label>
-    <input id="email" name="email" type="email" autocomplete="email" maxlength="200" required />
+    <input id="email" name={FIELDS.email} type="email" autocomplete="email" maxlength={MAX.email} required />
   </p>
 
   <p class="field">
     <label for="service">Service Requested <span class="req">(required)</span></label>
-    <select id="service" name="service" required>
+    <select id="service" name={FIELDS.service} required>
       <option value="">Select an option</option>
       {serviceOptions.map((o) => <option value={o}>{o}</option>)}
     </select>
@@ -188,7 +175,7 @@ const errorReasons: Record<string, string> = {
 
   <p class="field">
     <label for="payment">Payment Method <span class="req">(required)</span></label>
-    <select id="payment" name="payment" required>
+    <select id="payment" name={FIELDS.payment} required data-payment-options={JSON.stringify(paymentOptions)}>
       <option value="">Select an option</option>
       {allPaymentOptions.map((o) => <option value={o}>{o}</option>)}
     </select>
@@ -196,14 +183,16 @@ const errorReasons: Record<string, string> = {
 
   <p class="field">
     <label for="message">Message <span class="req">(required)</span></label>
-    <textarea id="message" name="message" rows="6" maxlength="5000" required></textarea>
+    <textarea id="message" name={FIELDS.message} rows="6" maxlength={MAX.message} required></textarea>
   </p>
 
   {/* Honeypot: a real person never fills this; bots usually do. Hidden from
-      assistive tech too, so screen-reader users don't trip it. */}
+      assistive tech too, so screen-reader users don't trip it. The name and
+      label are chosen to match no browser autofill heuristic (see the contract
+      module), so a saved address profile can't fill it either. */}
   <p class="hp" aria-hidden="true">
-    <label for="company">Company</label>
-    <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+    <label for={FIELDS.honeypot}>Leave this field empty</label>
+    <input id={FIELDS.honeypot} name={FIELDS.honeypot} type="text" tabindex="-1" />
   </p>
 
   {/* Cloudflare Turnstile — renders only when a public site key is configured

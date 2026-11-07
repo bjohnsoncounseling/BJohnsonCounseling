@@ -8,13 +8,17 @@
  * contact Worker (same code lineage).
  *
  * Per request it:
- *   1. rate-limits per IP (5/min → 429, fail-open);
- *   2. drops honeypot hits silently (a filled `company` field);
- *   3. validates the form fields;
- *   4. verifies the Cloudflare Turnstile token server-side (siteverify);
- *   5. sends via the `send_email` binding, from FROM_EMAIL
+ *   1. refuses a cross-site Origin and an oversized body;
+ *   2. rate-limits per IP (5/min → 429, fail-open);
+ *   3. drops honeypot hits silently (a filled `leave_blank` field);
+ *   4. validates the form fields;
+ *   5. verifies the Cloudflare Turnstile token server-side (siteverify);
+ *   6. sends via the `send_email` binding, from FROM_EMAIL
  *      (contact@bjohnsoncounseling.com) with Reply-To set to the submitter, to
  *      the verified destination inbox (DEST_EMAIL secret).
+ *
+ * Field names, length limits and error codes come from the contract module
+ * shared with the page (shared/contact-contract.js at the repo root).
  *
  * Nothing is persisted — the message is emailed to Brandon and forgotten; the
  * form asks people not to include sensitive health details.
@@ -30,17 +34,25 @@ import { EmailMessage } from "cloudflare:email";
 // The browser build — the Node build drags in node:path/os, which Workers
 // would need the nodejs_compat flag for.
 import { createMimeMessage, Mailbox } from "mimetext/browser";
-
-const MAX = { name: 100, email: 200, phone: 40, service: 60, payment: 60, message: 5000 };
+import { FIELDS, MAX, MAX_BODY_BYTES } from "../../../shared/contact-contract.js";
 
 // Header-bound fields must never carry CR/LF (header injection) — collapse all
 // whitespace runs. The message body keeps its newlines.
 const headerSafe = (v, max) =>
   String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 
-/** Fails closed on anything that isn't a plausible address. */
+/**
+ * Fails closed on anything that isn't a plausible address. The address goes
+ * into the Reply-To header as a Mailbox, so the characters RFC 5322 gives
+ * structural meaning (angle brackets, parentheses, quotes, commas, colons,
+ * semicolons, backslashes) are refused rather than passed through.
+ */
 const looksLikeEmail = (s) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s) && s.length <= MAX.email;
+  /^[^\s@<>()[\]\\,;:"]+@[^\s@<>()[\]\\,;:"]+\.[^\s@<>()[\]\\,;:".]{2,}$/.test(s) && s.length <= MAX.email;
+
+/** Hostnames the form may be served from (set in wrangler.toml). */
+const allowedHostnames = (env) =>
+  String(env.TURNSTILE_HOSTNAMES || "").split(",").map((h) => h.trim()).filter(Boolean);
 
 export default {
   async fetch(request, env) {
@@ -56,6 +68,20 @@ export default {
       wantsJson
         ? Response.json(error ? { ok: false, error } : { ok: true }, { status })
         : redirect(url, error);
+
+    // Browsers send Origin on every POST. Turnstile's hostname check is the
+    // real cross-site defence; this refuses the obvious case before any work.
+    // A missing Origin (curl, some privacy settings) is left to Turnstile.
+    const origin = request.headers.get("Origin");
+    if (origin && !allowedHostnames(env).includes(hostnameOf(origin))) {
+      return respond(403, "verification");
+    }
+
+    // Refuse a body declared larger than the form could ever produce before
+    // parsing it. A missing or unparsable Content-Length is left to formData().
+    if (Number(request.headers.get("Content-Length")) > MAX_BODY_BYTES) {
+      return respond(413, "malformed");
+    }
 
     // Per-IP rate limit before doing any real work. Fail open on a binding
     // hiccup — a broken limiter shouldn't take the contact form down.
@@ -74,21 +100,26 @@ export default {
       return respond(400, "malformed");
     }
 
-    // Honeypot. Silently accept so bots don't learn they were caught.
-    if (headerSafe(form.get("company"), 50)) return respond(200);
+    // Honeypot. Silently accept so bots don't learn they were caught. The
+    // warning is the only trace, so a run of them in Workers Logs is how a
+    // false positive (a real person's browser filling the field) would show.
+    if (headerSafe(form.get(FIELDS.honeypot), 50)) {
+      console.warn("honeypot tripped");
+      return respond(200);
+    }
 
-    const firstName = headerSafe(form.get("firstName"), MAX.name);
-    const lastName = headerSafe(form.get("lastName"), MAX.name);
-    const email = headerSafe(form.get("email"), MAX.email);
-    const phone = headerSafe(form.get("phone"), MAX.phone);
-    const service = headerSafe(form.get("service"), MAX.service);
-    const payment = headerSafe(form.get("payment"), MAX.payment);
-    const message = String(form.get("message") || "").trim().slice(0, MAX.message);
+    const firstName = headerSafe(form.get(FIELDS.firstName), MAX.name);
+    const lastName = headerSafe(form.get(FIELDS.lastName), MAX.name);
+    const email = headerSafe(form.get(FIELDS.email), MAX.email);
+    const phone = headerSafe(form.get(FIELDS.phone), MAX.phone);
+    const service = headerSafe(form.get(FIELDS.service), MAX.service);
+    const payment = headerSafe(form.get(FIELDS.payment), MAX.payment);
+    const message = String(form.get(FIELDS.message) || "").trim().slice(0, MAX.message);
 
     if (!firstName || !lastName || !email || !phone || !service || !payment || !message) return respond(400, "missing");
     if (!looksLikeEmail(email)) return respond(400, "email");
 
-    const token = String(form.get("cf-turnstile-response") || "");
+    const token = String(form.get(FIELDS.turnstile) || "");
     if (!(await verifyTurnstile(env, token, request))) {
       return respond(403, "verification");
     }
@@ -106,10 +137,18 @@ export default {
   },
 };
 
+function hostnameOf(origin) {
+  try {
+    return new URL(origin).hostname;
+  } catch {
+    return ""; // "null" or garbage: never allowed
+  }
+}
+
 function buildEmail(env, request, { firstName, lastName, email, phone, service, payment, message }) {
   const name = `${firstName} ${lastName}`;
   const msg = createMimeMessage();
-  msg.setSender({ name: "BJC contact form", addr: env.FROM_EMAIL });
+  msg.setSender({ name: "Brandon Johnson Counseling website", addr: env.FROM_EMAIL });
   msg.setRecipient(env.DEST_EMAIL);
   // mimetext validates known headers: Reply-To must be a Mailbox, not a bare
   // string (a string throws MIMETEXT_INVALID_HEADER_VALUE).
@@ -117,7 +156,12 @@ function buildEmail(env, request, { firstName, lastName, email, phone, service, 
   msg.setSubject(`Website inquiry — ${name} (${service})`);
   msg.addMessage({
     contentType: "text/plain",
-    data: [
+    // Base64 rather than mimetext's 7bit default: the message is free text, so
+    // it can carry non-ASCII (accents, emoji, CJK) and single lines longer than
+    // the 998 characters SMTP allows. Base64 wraps at 76 and is 8-bit safe.
+    // mimetext only labels the part; the data has to arrive already encoded.
+    encoding: "base64",
+    data: base64Lines([
       "New message from the bjohnsoncounseling.com contact form.",
       "",
       `Name:    ${name}`,
@@ -130,9 +174,17 @@ function buildEmail(env, request, { firstName, lastName, email, phone, service, 
       message,
       "",
       `— ${sentLine(request)}; reply to this email to answer.`,
-    ].join("\n"),
+    ].join("\n")),
   });
   return new EmailMessage(env.FROM_EMAIL, env.DEST_EMAIL, msg.asRaw());
+}
+
+/** UTF-8 text as base64, folded at the 76 columns RFC 2045 allows per line. */
+function base64Lines(text) {
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/.{76}(?=.)/g, "$&\r\n");
 }
 
 // The footer shows the SENDER's local time (from Cloudflare's IP-geolocation
@@ -177,16 +229,23 @@ async function verifyTurnstile(env, token, request) {
       console.warn("turnstile rejected:", JSON.stringify(verdict["error-codes"] ?? []));
       return false;
     }
+    // A real verdict always names the action and hostname the token was minted
+    // for. Only the always-pass test secret omits them, so a verdict without
+    // them is honoured only when TURNSTILE_DEV is set (in .dev.vars, for
+    // `wrangler dev`). In production that secret would otherwise let a token
+    // from any site, for any action, unlock the form.
+    if (!verdict.action || !verdict.hostname) {
+      if (env.TURNSTILE_DEV) return true;
+      console.warn("turnstile verdict without action/hostname (test secret in production?)");
+      return false;
+    }
     // A token minted for another action, or on another site that shares the
-    // widget (e.g. the pages.dev preview), must not unlock this form. The
-    // always-pass test secret returns neither field, so skip the checks when
-    // they're absent rather than locking out local testing.
-    if (verdict.action && verdict.action !== env.TURNSTILE_ACTION) {
+    // widget (e.g. the pages.dev preview), must not unlock this form.
+    if (verdict.action !== env.TURNSTILE_ACTION) {
       console.warn("turnstile action mismatch:", verdict.action);
       return false;
     }
-    const allowed = String(env.TURNSTILE_HOSTNAMES || "").split(",").map((h) => h.trim());
-    if (verdict.hostname && !allowed.includes(verdict.hostname)) {
+    if (!allowedHostnames(env).includes(verdict.hostname)) {
       console.warn("turnstile hostname not allowed:", verdict.hostname);
       return false;
     }
@@ -198,7 +257,7 @@ async function verifyTurnstile(env, token, request) {
 }
 
 // The no-JS native POST goes back to the contact page with the outcome in the
-// query string; the page's inline script reveals the matching status banner.
+// query string; the page's script reveals the matching status banner.
 function redirect(url, error) {
   const target = new URL("/contact/", url.origin);
   target.searchParams.set("submitted", error ? "error" : "ok");

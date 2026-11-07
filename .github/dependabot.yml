@@ -58,7 +58,9 @@ updates:
         # 5.x, @cloudflare/vitest-plugin 1.x). If one is added to
         # workers/contact-form/package.json, list it here.
 
-  # Workflows: actions/checkout, actions/setup-node. Majors stay ungrouped.
+  # Workflows: actions/checkout, actions/setup-node, cloudflare/wrangler-action
+  # (SHA-pinned with a version comment; Dependabot updates both). Majors stay
+  # ungrouped.
   - package-ecosystem: github-actions
     directory: /
     schedule:

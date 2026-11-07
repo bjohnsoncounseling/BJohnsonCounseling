@@ -14,7 +14,7 @@ import type { GetImageResult } from 'astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { address, addressOneLine, areaServed, contact, practitioner, rates, services, site } from '../config/site';
-import ogSource from '../assets/images/hero-tree.jpg';
+import ogSource from '../assets/images/og-card.png';
 
 interface Props {
   title: string;
@@ -35,14 +35,17 @@ const pageTitle = bareTitle ? title : `${title} — ${site.name}`;
 const canonical = new URL(Astro.url.pathname, site.url).href;
 
 /**
- * The link-preview image: today the same tree as the hero. To ship a branded
- * card (1200 x 630 with the mountain mark and the practice name) point the
- * `ogSource` import at the new file; its dimensions are read from the file,
- * so the og:image:width/height tags and the alt below are all that change.
+ * The link-preview image: a 1200 x 630 card with the mountain mark, the
+ * practice name and the service area, on the header's sand, in the site's own
+ * faces (drawn on a canvas against the running site, so the fonts match). It
+ * replaced the unbranded hero tree, which a texted link rendered as an
+ * anonymous photo. Flat colour and text, so it ships as PNG, not JPEG. To
+ * change it, replace the file; the dimensions are read from it.
  */
-const og = await getImage({ src: ogSource, format: 'jpg', width: ogSource.width });
+const og = await getImage({ src: ogSource, format: 'png', width: ogSource.width });
 const ogImage = new URL(og.src, site.url).href;
-const ogImageAlt = 'A broad oak tree in full leaf, backlit by low sun over a park lawn.';
+const ogImageAlt =
+  'Brandon Johnson Counseling. SE Portland, Oregon and Washington. A mountain and forest mark above the name.';
 
 /** Numeric dollar amount of a `rates` price such as "$175". */
 const dollars = (price: string) => Number(price.replace(/[^\d.]/g, ''));

@@ -57,10 +57,32 @@ export const practitioner = {
   name: 'Brandon Johnson',
   pronouns: 'He/Him/His',
   degree: 'MA',
-  /** `abbr` is the post-nominal form (LMFT, LMHC) used wherever the title won't fit. */
+  /**
+   * `abbr` is the post-nominal form (LMFT, LMHC) used wherever the title won't
+   * fit. `board` is the body that issued the licence (named in the structured
+   * data) and `verifyUrl` its public licence search, linked from every licence
+   * number on the site so anyone can check the number against the register.
+   */
   licenses: [
-    { title: 'Licensed Marriage & Family Therapist', abbr: 'LMFT', state: 'OR', number: 'T2389' },
-    { title: 'Licensed Mental Health Counselor', abbr: 'LMHC', state: 'WA', number: 'LH61514431' },
+    {
+      title: 'Licensed Marriage & Family Therapist',
+      abbr: 'LMFT',
+      state: 'OR',
+      number: 'T2389',
+      board: {
+        name: 'Oregon Board of Licensed Professional Counselors and Therapists',
+        url: 'https://www.oregon.gov/oblpct/',
+      },
+      verifyUrl: 'https://oblpct.us.thentiacloud.net/webs/oblpct/register/',
+    },
+    {
+      title: 'Licensed Mental Health Counselor',
+      abbr: 'LMHC',
+      state: 'WA',
+      number: 'LH61514431',
+      board: { name: 'Washington State Department of Health', url: 'https://doh.wa.gov/' },
+      verifyUrl: 'https://doh.wa.gov/licenses-permits-and-certificates/provider-credential-search',
+    },
   ],
 } as const;
 

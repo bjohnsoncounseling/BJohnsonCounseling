@@ -13,7 +13,7 @@ import { getImage } from 'astro:assets';
 import type { GetImageResult } from 'astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { address, addressOneLine, areaServed, contact, practitioner, rates, site } from '../config/site';
+import { address, addressOneLine, areaServed, contact, practitioner, rates, services, site } from '../config/site';
 import ogSource from '../assets/images/hero-tree.jpg';
 
 interface Props {
@@ -69,6 +69,8 @@ const jsonLd = {
       telephone: contact.phone,
       faxNumber: contact.fax,
       priceRange,
+      // schema.org's MedicalSpecialty has no counseling value; this is the nearest.
+      medicalSpecialty: 'Psychiatric',
       address: {
         '@type': 'PostalAddress',
         streetAddress: address.street,
@@ -106,10 +108,12 @@ const jsonLd = {
       email: contact.email,
       telephone: contact.phone,
       worksFor: { '@id': `${site.url}/#practice` },
+      knowsAbout: services.map((s) => s.title),
       hasCredential: practitioner.licenses.map((l) => ({
         '@type': 'EducationalOccupationalCredential',
         credentialCategory: 'license',
         name: `${l.title} (${l.state} #${l.number})`,
+        recognizedBy: { '@type': 'GovernmentOrganization', name: l.board.name, url: l.board.url },
       })),
     },
   ],

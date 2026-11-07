@@ -7,7 +7,7 @@ const year = new Date().getFullYear();
 <footer class="footer">
   <div class="container footer__inner">
     <div class="footer__col">
-      <h2 class="footer__heading">Stay in touch.</h2>
+      <h2 class="footer__heading">Reach me.</h2>
       <p class="footer__contact">
         <a href={`mailto:${contact.email}`}>{contact.email}</a>
         <br />
@@ -41,7 +41,7 @@ const year = new Date().getFullYear();
       {practitioner.licenses.map((l, i) => (
         <>
           {i > 0 ? ' · ' : ''}
-          {l.title} ({l.state} #{l.number})
+          {l.title} ({l.state} <a href={l.verifyUrl}>#{l.number}</a>)
         </>
       ))}
     </p>

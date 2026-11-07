@@ -38,8 +38,6 @@ import { acceptingNewClients, address, contact, practitioner, unavailableNotice 
             <a href={`mailto:${contact.email}`}>{contact.email}</a>
             <br />
             phone: <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a>
-            <br />
-            fax: {contact.fax}
           </p>
 
           <address>
@@ -47,6 +45,16 @@ import { acceptingNewClients, address, contact, practitioner, unavailableNotice 
             <br />
             {address.city}, {address.state} {address.zip}
           </address>
+
+          {/* The form's notice says this too, but someone who only wants the
+              phone number never reads the form. */}
+          <p class="contact__crisis">
+            This inbox isn&rsquo;t monitored for emergencies. If you are in crisis, call or text{' '}
+            <a href="tel:988">988</a>, or call <a href="tel:911">911</a>.
+          </p>
+
+          {/* Insurers and referring providers need the fax; clients don't. */}
+          <p class="contact__providers">For providers: fax {contact.fax}</p>
         </div>
 
         <div class="contact__form">
@@ -88,6 +96,16 @@ import { acceptingNewClients, address, contact, practitioner, unavailableNotice 
 
   .contact__details a {
     color: var(--accent-text);
+  }
+
+  .contact__crisis {
+    font-size: var(--size-small);
+    line-height: 1.6;
+  }
+
+  .contact__providers {
+    font-size: var(--size-small);
+    color: var(--ink-muted);
   }
 
   @media (min-width: 52rem) {

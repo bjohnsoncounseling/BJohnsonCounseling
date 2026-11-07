@@ -42,6 +42,9 @@ const hero = await heroImage(heroTree);
                   <strong>{service.note}</strong>
                 </p>
               )}
+              <p class="service__rates">
+                <a href="/about/">Rates and insurance</a>
+              </p>
             </div>
           </article>
         ))}
@@ -67,6 +70,10 @@ const hero = await heroImage(heroTree);
 
   .service h3 {
     margin-top: 0;
+  }
+
+  .service__rates a {
+    color: var(--accent-text);
   }
 
   @media (min-width: 52rem) {

@@ -68,17 +68,10 @@ const hero = await heroImage(heroTree);
             the licence. The old site credited "Zach Daschner" — a misspelling —
             with no link to either. */}
         <figcaption>
-          <a href="https://www.flickr.com/photos/zachd1_618/8081466807" target="_blank" rel="noopener noreferrer">
-            Mt. Hood
-          </a>{' '}
-          by{' '}
-          <a href="https://www.flickr.com/photos/zachd1_618/" target="_blank" rel="noopener noreferrer">
-            Zach Dischner
-          </a>
+          <a href="https://www.flickr.com/photos/zachd1_618/8081466807">Mt. Hood</a> by{' '}
+          <a href="https://www.flickr.com/photos/zachd1_618/">Zach Dischner</a>
           {', '}
-          <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">
-            CC BY 2.0
-          </a>
+          <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>
         </figcaption>
       </figure>
     </div>
@@ -106,8 +99,6 @@ const hero = await heroImage(heroTree);
         <a
           class="map-link"
           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressOneLine)}`}
-          target="_blank"
-          rel="noopener noreferrer"
         >
           View {addressOneLine} on Google Maps
         </a>
@@ -157,7 +148,7 @@ const hero = await heroImage(heroTree);
           <br />
           {practitioner.licenses.map((l) => (
             <>
-              {l.abbr} ({l.state}: {l.number})<br />
+              {l.abbr} ({l.state}: <a href={l.verifyUrl}>{l.number}</a>)<br />
             </>
           ))}
         </p>
@@ -186,9 +177,7 @@ const hero = await heroImage(heroTree);
       <ul class="memberships">
         {memberships.map((m) => (
           <li>
-            <a href={m.url} target="_blank" rel="noopener noreferrer">
-              {m.name}
-            </a>
+            <a href={m.url}>{m.name}</a>
           </li>
         ))}
       </ul>
@@ -196,7 +185,7 @@ const hero = await heroImage(heroTree);
       <ul class="badges">
         {badges.map((b) => (
           <li>
-            <a href={b.href} target="_blank" rel="noopener noreferrer">
+            <a href={b.href}>
               <Image src={b.image} alt={b.alt} widths={[160, 320]} width={Math.min(320, b.image.width)} sizes="10rem" />
             </a>
           </li>

@@ -68,6 +68,42 @@ describe('internal links', () => {
   });
 });
 
+describe('external links', () => {
+  // A link that opens a new tab without saying so disorients screen reader
+  // users (WCAG 3.2.5); the audit chose dropping target="_blank" over
+  // labelling every external link.
+  it('open in the same tab', () => {
+    const offenders = [];
+    for (const page of pages()) {
+      const html = readFileSync(dist(page), 'utf8');
+      for (const [tag] of html.matchAll(/<a\b[^>]*\btarget="_blank"[^>]*>/g)) offenders.push(`${page}: ${tag}`);
+    }
+    assert.deepEqual(offenders, []);
+  });
+});
+
+describe('search metadata', () => {
+  it('keeps every meta description at 155 characters or fewer', () => {
+    const long = [];
+    for (const page of pages()) {
+      const html = readFileSync(dist(page), 'utf8');
+      const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1];
+      assert.ok(description, `${page}: no meta description`);
+      // Entities (&amp;, &#39;) are one character each to a reader.
+      const length = description.replaceAll(/&[^;]+;/g, 'x').length;
+      if (length > 155) long.push(`${page}: ${length} characters`);
+    }
+    assert.deepEqual(long, []);
+  });
+
+  it('dates every sitemap entry', () => {
+    const sitemap = readFileSync(dist('sitemap-0.xml'), 'utf8');
+    const entries = [...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => m[1]);
+    assert.ok(entries.length >= 7, `only ${entries.length} URLs in the sitemap`);
+    for (const entry of entries) assert.match(entry, /<lastmod>\d{4}-\d{2}-\d{2}/, entry);
+  });
+});
+
 describe('content security policy', () => {
   const headers = () => readFileSync(dist('_headers'), 'utf8');
 

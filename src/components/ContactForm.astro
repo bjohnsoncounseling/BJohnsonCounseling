@@ -34,6 +34,25 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
   const messageFor = (reason: string | null) =>
     (reason && (ERRORS as Record<string, string>)[reason]) || 'Something went wrong.';
 
+  // Marks a field the server rejected (or clears the mark): aria-invalid on
+  // the input, and the message in the field's own error element, which
+  // aria-describedby ties to it. The banner alone leaves a screen reader user
+  // to guess which field was meant.
+  const fieldError = (id: string, message: string | null) => {
+    const input = document.getElementById(id);
+    const note = document.getElementById(`${id}-error`);
+    if (!input || !note) return;
+    note.textContent = message ?? '';
+    note.hidden = !message;
+    if (message) {
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', note.id);
+    } else {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    }
+  };
+
   // Shared success/error UI for both paths — reuses the one status banner.
   const showBanner = (status: 'ok' | 'error', reason: string | null = null) => {
     const box = document.querySelector<HTMLElement>('[data-status]');
@@ -44,6 +63,8 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
     if (!box) return;
 
     box.hidden = false;
+    // The Worker's `email` rejection is the one error that names a field.
+    fieldError('email', status === 'error' && reason === 'email' ? messageFor(reason) : null);
     if (status === 'ok') {
       if (ok) ok.hidden = false;
       if (err) err.hidden = true;
@@ -64,6 +85,9 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
 
     const needsTurnstile = !!form.querySelector('.cf-turnstile');
     const label = submit.textContent;
+
+    // Editing the address withdraws the server's verdict on the old one.
+    form.querySelector('#email')?.addEventListener('input', () => fieldError('email', null));
 
     // The payment select's options depend on the service chosen above it.
     const service = form.querySelector<HTMLSelectElement>('#service');
@@ -182,6 +206,10 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
       Email <span class="req">(required)</span>
     </label>
     <input id="email" name={FIELDS.email} type="email" autocomplete="email" maxlength={MAX.email} required />
+    {/* Filled by the script when the Worker rejects the address, and tied to
+        the input with aria-describedby, so the error is read with the field
+        and not only from the banner above the form. */}
+    <span class="field__error" id="email-error" hidden></span>
   </p>
 
   <p class="field">
@@ -212,7 +240,17 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
     <label for="message">
       Message <span class="req">(required)</span>
     </label>
-    <textarea id="message" name={FIELDS.message} rows="6" maxlength={MAX.message} required></textarea>
+    <span class="hint" id="message-hint">
+      A sentence or two about what brings you here is plenty.
+    </span>
+    <textarea
+      id="message"
+      name={FIELDS.message}
+      rows="6"
+      maxlength={MAX.message}
+      aria-describedby="message-hint"
+      required
+    ></textarea>
   </p>
 
   {/* Honeypot: a real person never fills this; bots usually do. Hidden from
@@ -240,9 +278,14 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
     </Fragment>
   )}
 
-  <button type="submit" class="form__submit">
-    Send
-  </button>
+  <div class="form__actions">
+    <button type="submit" class="form__submit">
+      Send
+    </button>
+    <p class="form__alt">
+      Prefer to talk? Call <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a>.
+    </p>
+  </div>
 </form>
 
 <style>
@@ -316,6 +359,18 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
     font-size: 0.9rem;
   }
 
+  .hint {
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .field__error {
+    color: #b3261e;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
   input,
   select,
   textarea {
@@ -332,10 +387,12 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
     resize: vertical;
   }
 
-  /* Marks the field, not just the summary, when validation fails. */
+  /* Marks the field, not just the summary, when validation fails: the
+     browser's own check, or the Worker's (aria-invalid, set by the script). */
   input:user-invalid,
   select:user-invalid,
-  textarea:user-invalid {
+  textarea:user-invalid,
+  [aria-invalid='true'] {
     border-color: #b3261e;
     outline-color: #b3261e;
   }
@@ -368,6 +425,23 @@ const allPaymentOptions = [...new Set(Object.values(paymentOptions).flat())];
 
   .form__submit:hover {
     background: var(--accent-strong-hover);
+  }
+
+  /* The call option sits beside Send, for people who would rather talk. */
+  .form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm) var(--space-md);
+  }
+
+  .form__alt {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .form__alt a {
+    color: var(--accent-text);
   }
 
   @media (min-width: 32rem) {

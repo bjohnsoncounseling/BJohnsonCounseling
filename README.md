@@ -86,7 +86,9 @@ npm run deploy     # needs `npx wrangler login` once
 CI (`.github/workflows/ci.yml`) runs type-check, build, the site tests, the
 Worker tests and a Worker dry-run bundle on every push and PR, plus
 `npm audit` on both trees. Dependabot keeps both lockfiles and the Actions
-pins current (`.github/dependabot.yml` explains the grouping).
+pins current (`.github/dependabot.yml` explains the grouping). In the Worker,
+`wrangler` and `@cloudflare/vitest-plugin` move together: the plugin pins an
+exact wrangler, so bump them in the same change.
 
 ### Layout
 

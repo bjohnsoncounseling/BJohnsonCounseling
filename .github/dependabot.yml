@@ -10,6 +10,8 @@
 #     read and tested on its own instead of riding along in a bundle.
 #   - 0.x packages are excluded from the bundle (see below) and so also get
 #     one PR per release.
+#   - Packages that pin each other at an exact version move in a lockstep
+#     group of their own (the worker's wrangler + vitest plugin, see below).
 #   - No `commit-message` prefix: this repo's history is plain imperative
 #     sentences, and Dependabot's default ("Bump x from a to b") already fits.
 #
@@ -47,13 +49,31 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    # Budget: 1 bundle PR + up to 2 ungrouped majors, with headroom.
+    # Budget: 1 bundle PR + 1 lockstep PR + up to 2 ungrouped majors (vitest,
+    # mimetext), with headroom.
     open-pull-requests-limit: 5
     groups:
+      # Listed FIRST: a dependency joins the first group it matches.
+      # @cloudflare/vitest-plugin pins wrangler at an exact version (1.5.1 ->
+      # wrangler 4.157.0, 1.6.1 -> 4.159.0). Bumping wrangler alone makes npm
+      # install a second, nested wrangler under the plugin, so the tests run
+      # against a different wrangler from the one that deploys. No
+      # update-types filter: a wrangler major must move with the plugin too.
+      # It still gets a PR of its own, apart from the minor/patch bundle.
+      # Check `npm ls wrangler` shows one copy after merging.
+      worker-wrangler-lockstep:
+        patterns:
+          - wrangler
+          - '@cloudflare/vitest-plugin'
       worker-npm-minor-patch:
         update-types:
           - minor
           - patch
+        # Already in worker-wrangler-lockstep above; excluded here so the
+        # intent survives a reordering of the groups.
+        exclude-patterns:
+          - wrangler
+          - '@cloudflare/vitest-plugin'
         # No 0.x direct dependencies today (wrangler 4.x, mimetext 3.x, vitest
         # 5.x, @cloudflare/vitest-plugin 1.x). If one is added to
         # workers/contact-form/package.json, list it here.

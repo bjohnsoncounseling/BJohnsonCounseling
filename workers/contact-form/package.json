@@ -13,7 +13,7 @@
     "mimetext": "^3.0.28"
   },
   "devDependencies": {
-    "@cloudflare/vitest-plugin": "^1.6.0",
+    "@cloudflare/vitest-plugin": "^1.8.2",
     "vitest": "^5.1.0",
     "wrangler": "^4.156.2"
   }
